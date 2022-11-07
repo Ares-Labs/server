@@ -4,11 +4,12 @@
   },
   "db" : {
     "url": "jdbc:h2:./db-06",
-    "username": "",
-    "password": "",
+    "username": "group-06",
+    "password": "rDB8yuZ5Br3",
     "webconsole.port": 9000
   },
   "api" : {
+    "dev.url": "../documentation/api-spec/openapi-mars.yaml",
     "url": "http://project-ii.ti.howest.be/monitor/apis/group-06"
   }
 }
