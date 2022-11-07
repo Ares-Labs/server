@@ -5,19 +5,16 @@ import be.howest.ti.mars.logic.data.Repositories;
 import be.howest.ti.mars.web.bridge.MarsOpenApiBridge;
 import be.howest.ti.mars.web.bridge.MarsRtcBridge;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.commons.util.StringUtils;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(VertxExtension.class)
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals"})
 /*
  * PMD.JUnitTestsShouldIncludeAssert: VertxExtension style asserts are marked as false positives.
  * PMD.AvoidDuplicateLiterals: Should all be part of the spec (e.g., urls and names of req/res body properties, ...)
@@ -25,11 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OpenAPITest {
 
-    private static final int PORT = 8080;
-    private static final String HOST = "localhost";
     public static final String MSG_200_EXPECTED = "If all goes right, we expect a 200 status";
     public static final String MSG_201_EXPECTED = "If a resource is successfully created.";
     public static final String MSG_204_EXPECTED = "If a resource is successfully deleted";
+    private static final int PORT = 8080;
+    private static final String HOST = "localhost";
     private Vertx vertx;
     private WebClient webClient;
 
@@ -53,75 +50,18 @@ class OpenAPITest {
         Repositories.shutdown();
     }
 
-    @Test
-    void getQuote(final VertxTestContext testContext) {
-        webClient.get(PORT, HOST, "/api/quotes/2").send()
-                .onFailure(testContext::failNow)
-                .onSuccess(response -> testContext.verify(() -> {
-                    assertEquals(200, response.statusCode(), MSG_200_EXPECTED);
-                    assertTrue(
-                            StringUtils.isNotBlank(response.bodyAsJsonObject().getString("value")),
-                            "Empty quotes are not allowed"
-                    );
-                    testContext.completeNow();
-                }));
-    }
-
-    @Test
-    void getQuoteWithInvalidID(final VertxTestContext testContext) {
-        webClient.get(PORT, HOST, "/api/quotes/333").send()
-                .onFailure(testContext::failNow)
-                .onSuccess(response -> testContext.verify(() -> {
-                    assertEquals(200, response.statusCode(), MSG_200_EXPECTED);
-                    assertTrue(
-                            StringUtils.isNotBlank(response.bodyAsJsonObject().getString("value")),
-                            "Empty quotes are not allowed"
-                    );
-                    testContext.completeNow();
-                }));
-    }
-
-    @Test
-    void createQuote(final VertxTestContext testContext) {
-        String testQuote = "some value";
-        webClient.post(PORT, HOST, "/api/quotes").sendJsonObject(createQuote(testQuote))
-                .onFailure(testContext::failNow)
-                .onSuccess(response -> testContext.verify(() -> {
-                    assertEquals(201, response.statusCode(), MSG_201_EXPECTED);
-                    assertEquals(
-                            testQuote,
-                            response.bodyAsJsonObject().getString("value"),
-                            "Quote does not match " + testQuote);
-                    testContext.completeNow();
-                }));
-    }
-
-    @Test
-    void updateQuote(final VertxTestContext testContext) {
-        String testQuote = "some value";
-        webClient.put(PORT, HOST, "/api/quotes/0").sendJsonObject(createQuote(testQuote))
-                .onFailure(testContext::failNow)
-                .onSuccess(response -> testContext.verify(() -> {
-                    assertEquals(200, response.statusCode(), MSG_200_EXPECTED);
-                    assertEquals(
-                            testQuote,
-                            response.bodyAsJsonObject().getString("value"),
-                            "Quote does not match " + testQuote);
-                    testContext.completeNow();
-                }));
-    }
-
-    @Test
-    void deleteQuote(final VertxTestContext testContext) {
-        webClient.delete(PORT, HOST, "/api/quotes/1").send()
-                .onFailure(testContext::failNow)
-                .onSuccess(response -> testContext.verify(() -> {
-                    assertEquals(204, response.statusCode(), MSG_204_EXPECTED);
-                    testContext.completeNow();
-                }));
-    }
-
-    private JsonObject createQuote(String quote) {
-        return new JsonObject().put("quote", quote);
-    }
+    // TODO: Test endpoints
+//    @Test
+//    void getQuote(final VertxTestContext testContext) {
+//        webClient.get(PORT, HOST, "/api/quotes/2").send()
+//                .onFailure(testContext::failNow)
+//                .onSuccess(response -> testContext.verify(() -> {
+//                    assertEquals(200, response.statusCode(), MSG_200_EXPECTED);
+//                    assertTrue(
+//                            StringUtils.isNotBlank(response.bodyAsJsonObject().getString("value")),
+//                            "Empty quotes are not allowed"
+//                    );
+//                    testContext.completeNow();
+//                }));
+//    }
 }

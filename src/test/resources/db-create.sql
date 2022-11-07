@@ -1,8 +1,3 @@
-DROP DATABASE IF EXISTS `ares_labs`;
-CREATE DATABASE IF NOT EXISTS `ares_labs`;
-
-USE `ares_labs`;
-
 CREATE TABLE IF NOT EXISTS `users`
 (
     id        VARCHAR(36) NOT NULL PRIMARY KEY,
