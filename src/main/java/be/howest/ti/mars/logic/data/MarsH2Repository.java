@@ -1,6 +1,5 @@
 package be.howest.ti.mars.logic.data;
 
-import be.howest.ti.mars.logic.domain.Quote;
 import be.howest.ti.mars.logic.exceptions.RepositoryException;
 import org.h2.tools.Server;
 
@@ -13,6 +12,83 @@ import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/* All queries:
+-- Initial user registry
+INSERT INTO users (id, full_name)
+VALUES (?, ?);
+
+-- Add a property
+INSERT INTO properties (location, tier, x, y, width, height)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- Assign a property to a user
+INSERT INTO user_properties (user_id, property_location)
+VALUES (?, ?);
+
+-- Add user to white list
+INSERT INTO property_whitelists (user_id, property_location)
+VALUES (?, ?);
+
+-- Add equipment to a property
+INSERT INTO installed_equipment (description, property_location, type)
+VALUES (?, ?, ?);
+
+-- Add an alert (this includes authorized users)
+INSERT INTO alerts (user_id, property_location)
+VALUES (?, ?);
+
+-- Select a user's properties
+SELECT *
+FROM properties
+WHERE location IN (SELECT property_location
+                   FROM user_properties
+                   WHERE user_id = ?);
+
+-- Select whitelisted users of a property
+SELECT *
+FROM users
+WHERE id IN (SELECT user_id
+             FROM property_whitelists
+             WHERE property_location = ?);
+
+-- Select alerts from a user
+SELECT *
+FROM alerts
+WHERE user_id = ?
+ORDER BY timestamp DESC
+LIMIT ?;
+
+-- Select alerts and trespass from a property
+SELECT a.id, a.timestamp, u.id, u.full_name
+FROM alerts AS a
+         JOIN users u ON a.user_id = u.id
+WHERE property_location = ?
+ORDER BY a.timestamp DESC
+LIMIT ?;
+
+-- Select alerts from users that are not whitelisted on a property
+SELECT a.id, a.timestamp, u.id, u.full_name
+FROM alerts AS a
+         JOIN users u ON a.user_id = u.id
+WHERE property_location = ?
+  AND u.id NOT IN (SELECT w.user_id FROM property_whitelists AS w WHERE w.property_location = ?)
+  AND u.id NOT IN (SELECT m.user_id FROM user_properties AS m WHERE m.property_location = ?)
+ORDER BY a.timestamp DESC
+LIMIT ?;
+
+-- Get protected areas that you currently reside in
+SELECT location, tier
+FROM properties
+WHERE x < ?
+  AND x + width > ?
+  AND y > ?
+  AND y + height > ?;
+
+-- Get all property locations
+SELECT x, y, width, height
+FROM properties;
+ */
+
 /*
 This is only a starter class to use an H2 database.
 In this start project there was no need for a Java interface MarsRepository.
@@ -23,10 +99,6 @@ To make this class useful, please complete it with the topics seen in the module
 
 public class MarsH2Repository {
     private static final Logger LOGGER = Logger.getLogger(MarsH2Repository.class.getName());
-    private static final String SQL_QUOTA_BY_ID = "select id, quote from quotes where id = ?;";
-    private static final String SQL_INSERT_QUOTE = "insert into quotes (`quote`) values (?);";
-    private static final String SQL_UPDATE_QUOTE = "update quotes set quote = ? where id = ?;";
-    private static final String SQL_DELETE_QUOTE = "delete from quotes where id = ?;";
     private final Server dbWebConsole;
     private final String username;
     private final String password;
@@ -45,79 +117,6 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "DB configuration failed", ex);
             throw new RepositoryException("Could not configure MarsH2repository");
-        }
-    }
-
-    public Quote getQuote(int id) {
-        try (
-                Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(SQL_QUOTA_BY_ID)
-        ) {
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new Quote(rs.getInt("id"), rs.getString("quote"));
-                } else {
-                    return null;
-                }
-            }
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Failed to get quote.", ex);
-            throw new RepositoryException("Could not get quote.");
-        }
-    }
-
-    public Quote insertQuote(String quoteValue) {
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SQL_INSERT_QUOTE, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, quoteValue);
-
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new SQLException("Creating user failed, no rows affected.");
-            }
-
-            Quote quote = new Quote(quoteValue);
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    quote.setId(generatedKeys.getInt(1));
-                    return quote;
-                }
-                else {
-                    throw new SQLException("Creating quote failed, no ID obtained.");
-                }
-            }
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Failed to create quote.", ex);
-            throw new RepositoryException("Could not create quote.");
-        }
-    }
-
-    public Quote updateQuote(int quoteId, String quote) {
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SQL_UPDATE_QUOTE)) {
-
-            stmt.setString(1, quote);
-            stmt.setInt(2, quoteId);
-            stmt.executeUpdate();
-            return new Quote(quoteId, quote);
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Failed to update quote.", ex);
-            throw new RepositoryException("Could not update quote.");
-        }
-    }
-
-    public void deleteQuote(int quoteId) {
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SQL_DELETE_QUOTE)) {
-
-            stmt.setInt(1, quoteId);
-            stmt.execute();
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Failed to delete quote.", ex);
-            throw new RepositoryException("Could not delete quote.");
         }
     }
 
@@ -147,7 +146,7 @@ public class MarsH2Repository {
         String createDbSql = readFile(fileName);
         try (
                 Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(createDbSql);
+                PreparedStatement stmt = conn.prepareStatement(createDbSql)
         ) {
             stmt.executeUpdate();
         }

@@ -22,7 +22,6 @@ import java.util.TimerTask;
  *
  * The job of the "bridge" is to bridge between websockets events and Java (the controller).
  * Just like in the openapi bridge, keep business logic isolated in the package logic.
- * <p>
  */
 public class MarsRtcBridge {
     private static final String EB_EVENT_TO_MARTIANS = "events.to.martians";

@@ -1,5 +1,3 @@
-USE `ares_labs`;
-
 INSERT INTO `tiers` (name, price)
 VALUES ('Basic', 59.99),
        ('Premium', 99.99),
