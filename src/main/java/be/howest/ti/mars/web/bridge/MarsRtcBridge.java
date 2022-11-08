@@ -4,6 +4,7 @@ import be.howest.ti.mars.logic.domain.EventHandler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
@@ -22,8 +23,8 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler;
  * Just like in the openapi bridge, keep business logic isolated in the package logic.
  */
 public class MarsRtcBridge {
-    private static final String EB_EVENT_TO_MARTIANS = "events.to.martians";
-    private static final String EB_EVENT_FROM_MARTIANS = "events.from.martians";
+    private static final String OUTBOUND = "events.to.martians";
+    private static final String INBOUND = "events.from.martians";
     private SockJSHandler sockJSHandler;
     private EventBus eb;
 
@@ -36,12 +37,17 @@ public class MarsRtcBridge {
         sockJSHandler.bridge(options);
     }
 
-    private void handleConsumerMessage(Message<String> msg) {
-        JsonObject message = new JsonObject(msg.body());
+    private void handleConsumerMessage(String address, Message<JsonObject> msg) {
+        // TODO: Find WHY vertx is not casting this
+//        JsonObject message = new JsonObject(msg.body());
         EventHandler eh = EventHandler.getInstance();
-        SocketResponse response = eh.handleIncomingEvent(message);
-        String res = response.toMessage().toString();
-        eb.publish(EB_EVENT_TO_MARTIANS, res);
+        SocketResponse response = eh.handleIncomingEvent(msg.body());
+//        String res = response.toMessage().toString();
+        eb.publish(address, response.toMessage());
+    }
+
+    private void handlePublicConsumerMessage(Message<JsonObject> msg) {
+        handleConsumerMessage(OUTBOUND, msg);
     }
 
     public SockJSHandler getSockJSHandler(Vertx vertx) {
@@ -49,7 +55,14 @@ public class MarsRtcBridge {
         eb = vertx.eventBus();
         createSockJSHandler();
 
-        eb.consumer(EB_EVENT_FROM_MARTIANS, this::handleConsumerMessage);
+        eb.consumer(INBOUND, this::handlePublicConsumerMessage);
+
+        // Session event bus initialisation
+        EventHandler.getInstance().addEventHandler("session", data -> {
+            String id = data.toString();
+            eb.consumer(INBOUND + "." + id, (Message<JsonObject> msg) -> handleConsumerMessage(OUTBOUND + "." + id, msg));
+            return null;
+        });
 
         return sockJSHandler;
     }
