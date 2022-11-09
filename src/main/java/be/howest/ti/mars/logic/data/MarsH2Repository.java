@@ -235,8 +235,9 @@ public class MarsH2Repository {
             stmt.setString(1, propertyId);
             ResultSet rs = stmt.executeQuery();
             JsonObject result = new JsonObject();
+            result.put("allowedUsers", new JsonObject());
             while (rs.next()) {
-                result.put(rs.getString("id"), rs.getString("full_name"));
+                result.getJsonObject("allowedUsers").put(rs.getString("id"), rs.getString("full_name"));
             }
             return result;
         } catch (SQLException ex) {

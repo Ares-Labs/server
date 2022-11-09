@@ -27,6 +27,7 @@ public class MarsOpenApiBridge {
 //    private final MarsController controller;
 
     public MarsOpenApiBridge() {
+        // Creates new instance of the controller
     }
 
     public Router buildRouter(RouterBuilder routerBuilder) {

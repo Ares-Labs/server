@@ -35,6 +35,13 @@ public class Properties {
     }
 
     public static SocketResponse getAllowedUsers(JsonObject data) {
-        return new DataEventResponse("getAllowedUsers", Repositories.getH2Repo().getAllowedUsers(data.getString("propertyId")));
+        try {
+            MarsH2Repository repo = Repositories.getH2Repo();
+
+            String propertyId = Utils.getOrThrowString(data, "propertyId");
+            return new DataEventResponse("getAllowedUsers", repo.getAllowedUsers(propertyId));
+        } catch (RepositoryException ex) {
+            return new ErrorEventResponse(ex.getMessage());
+        }
     }
 }
