@@ -12,6 +12,9 @@ import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * The RTC bridge is one of the class taught topics.
  * If you do not choose the RTC topic you don't have to do anything with this class.
@@ -27,6 +30,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 public class MarsRtcBridge {
     private static final String OUTBOUND = "events.to.martians";
     private static final String INBOUND = "events.from.martians";
+    private static final Logger LOGGER = Logger.getLogger(MarsRtcBridge.class.getName());
     private SockJSHandler sockJSHandler;
     private EventBus eb;
 
@@ -87,6 +91,8 @@ public class MarsRtcBridge {
 
         SocketResponse res = new StatusMessageEventResponse("created");
         res.setChannel(out);
+
+        LOGGER.log(Level.INFO, "New session created: {0}", id);
         return res;
     }
 }

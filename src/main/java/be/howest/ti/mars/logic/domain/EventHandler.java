@@ -5,10 +5,13 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EventHandler {
     private static final EventHandler INSTANCE = new EventHandler();
     private final Map<String, MessageHandler> messageHandlers = new HashMap<>();
+    private static final Logger LOGGER = Logger.getLogger(EventHandler.class.getName());
 
     private EventHandler() {
     }
@@ -28,6 +31,8 @@ public class EventHandler {
     }
 
     public SocketResponse handleIncomingEvent(JsonObject message) {
+        LOGGER.log(Level.INFO, "Incoming event: {0}", message);
+
         String type = message.getString("type");
         errorIfNull(type, "No type specified in message");
 
