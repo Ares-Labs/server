@@ -40,13 +40,8 @@ public class EventHandler {
         System.out.println(message);
         System.out.println(data);
 
-        JsonObject dataJson;
-        try {
-//            dataJson = new JsonObject(data);
-        } catch (DecodeException e) {
-            return new ErrorEventResponse("Data is not a valid JSON object");
-        }
 
+        System.out.println(handler.apply(data));
         return handler.apply(data);
     }
 }

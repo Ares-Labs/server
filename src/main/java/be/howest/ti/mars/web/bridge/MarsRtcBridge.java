@@ -4,7 +4,6 @@ import be.howest.ti.mars.logic.domain.EventHandler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
@@ -37,16 +36,18 @@ public class MarsRtcBridge {
         sockJSHandler.bridge(options);
     }
 
-    private void handleConsumerMessage(String address, Message<JsonObject> msg) {
-        // TODO: Find WHY vertx is not casting this
-//        JsonObject message = new JsonObject(msg.body());
+    private void handleConsumerMessage(String address, Message<String> msg) {
+
+        System.out.println(new JsonObject(msg.body()));
+        System.out.println(new JsonObject(msg.body()).getJsonObject("data"));
+
         EventHandler eh = EventHandler.getInstance();
-        SocketResponse response = eh.handleIncomingEvent(msg.body());
+        SocketResponse response = eh.handleIncomingEvent(new JsonObject(msg.body()));
 //        String res = response.toMessage().toString();
         eb.publish(address, response.toMessage());
     }
 
-    private void handlePublicConsumerMessage(Message<JsonObject> msg) {
+    private void handlePublicConsumerMessage(Message<String> msg) {
         handleConsumerMessage(OUTBOUND, msg);
     }
 
@@ -60,7 +61,7 @@ public class MarsRtcBridge {
         // Session event bus initialisation
         EventHandler.getInstance().addEventHandler("session", data -> {
             String id = data.toString();
-            eb.consumer(INBOUND + "." + id, (Message<JsonObject> msg) -> handleConsumerMessage(OUTBOUND + "." + id, msg));
+            eb.consumer(INBOUND + "." + id, (Message<String> msg) -> handleConsumerMessage(OUTBOUND + "." + id, msg));
             return null;
         });
 
