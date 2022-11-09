@@ -124,15 +124,12 @@ public class MarsH2Repository {
         }
     }
 
-    public void insertProperty(String location, int tier, int x, int y, int width, int height) {
+    public void insertProperty(String location, int tier, String description) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(SQL_ADD_PROPERTY)) {
             stmt.setString(1, location);
             stmt.setInt(2, tier);
-            stmt.setInt(3, x);
-            stmt.setInt(4, y);
-            stmt.setInt(5, width);
-            stmt.setInt(6, height);
+            stmt.setString(3, description);
 
             stmt.executeUpdate();
         } catch (SQLException ex) {

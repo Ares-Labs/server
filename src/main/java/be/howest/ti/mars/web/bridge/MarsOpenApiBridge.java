@@ -24,6 +24,10 @@ import java.util.logging.Logger;
  */
 public class MarsOpenApiBridge {
     private static final Logger LOGGER = Logger.getLogger(MarsOpenApiBridge.class.getName());
+//    private final MarsController controller;
+
+    public MarsOpenApiBridge() {
+    }
 
     public Router buildRouter(RouterBuilder routerBuilder) {
         LOGGER.log(Level.INFO, "Installing cors handlers");
