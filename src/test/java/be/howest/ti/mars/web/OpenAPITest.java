@@ -1,6 +1,5 @@
 package be.howest.ti.mars.web;
 
-import be.howest.ti.mars.logic.controller.MockMarsController;
 import be.howest.ti.mars.logic.data.Repositories;
 import be.howest.ti.mars.web.bridge.MarsOpenApiBridge;
 import be.howest.ti.mars.web.bridge.MarsRtcBridge;
@@ -35,11 +34,11 @@ class OpenAPITest {
         Repositories.shutdown();
         vertx = Vertx.vertx();
 
-        WebServer webServer = new WebServer(new MarsOpenApiBridge(new MockMarsController()), new MarsRtcBridge());
-        vertx.deployVerticle(
-                webServer,
-                testContext.succeedingThenComplete()
-        );
+//        WebServer webServer = new WebServer(new MarsOpenApiBridge());
+//        vertx.deployVerticle(
+//                webServer,
+//                testContext.succeedingThenComplete()
+//        );
         webClient = WebClient.create(vertx);
     }
 
