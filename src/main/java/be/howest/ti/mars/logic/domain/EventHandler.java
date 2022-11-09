@@ -1,7 +1,6 @@
 package be.howest.ti.mars.logic.domain;
 
 import be.howest.ti.mars.web.bridge.SocketResponse;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
@@ -35,13 +34,14 @@ public class EventHandler {
         MessageHandler handler = messageHandlers.get(type);
         errorIfNull(handler, "Unknown event type: " + type);
 
-        JsonObject data = message.getJsonObject("data");
+        JsonObject data;
+        try {
+            data = message.getJsonObject("data");
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Data is not a JsonObject");
+        }
         errorIfNull(data, "No data specified in message");
-        System.out.println(message);
-        System.out.println(data);
 
-
-        System.out.println(handler.apply(data));
         return handler.apply(data);
     }
 }

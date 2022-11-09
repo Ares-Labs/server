@@ -1,6 +1,8 @@
 package be.howest.ti.mars.web.bridge;
 
 import be.howest.ti.mars.logic.domain.EventHandler;
+import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
+import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
@@ -37,18 +39,28 @@ public class MarsRtcBridge {
     }
 
     private void handleConsumerMessage(String address, Message<String> msg) {
-
-        System.out.println(new JsonObject(msg.body()));
-        System.out.println(new JsonObject(msg.body()).getJsonObject("data"));
-
         EventHandler eh = EventHandler.getInstance();
-        SocketResponse response = eh.handleIncomingEvent(new JsonObject(msg.body()));
-//        String res = response.toMessage().toString();
-        eb.publish(address, response.toMessage());
+        SocketResponse response;
+
+        try {
+            response = eh.handleIncomingEvent(new JsonObject(msg.body()));
+        } catch (Exception e) {
+            response = new ErrorEventResponse(e.getMessage());
+        }
+
+        if (response != null) {
+            String out = response.getChannel() != null ? response.getChannel() : address;
+
+            eb.publish(out, response.toMessage());
+        }
     }
 
     private void handlePublicConsumerMessage(Message<String> msg) {
         handleConsumerMessage(OUTBOUND, msg);
+    }
+
+    private String formatAddress(String address, String id) {
+        return String.format("%s.%s", address, id);
     }
 
     public SockJSHandler getSockJSHandler(Vertx vertx) {
@@ -60,9 +72,17 @@ public class MarsRtcBridge {
 
         // Session event bus initialisation
         EventHandler.getInstance().addEventHandler("session", data -> {
-            String id = data.toString();
-            eb.consumer(INBOUND + "." + id, (Message<String> msg) -> handleConsumerMessage(OUTBOUND + "." + id, msg));
-            return null;
+            String id = data.getString("id");
+            String out = formatAddress(OUTBOUND, id);
+            eb.consumer(formatAddress(INBOUND, id), (Message<String> msg) -> handleConsumerMessage(out, msg));
+
+            SocketResponse res = new StatusMessageEventResponse("created");
+            res.setChannel(out);
+            return res;
+        });
+
+        EventHandler.getInstance().addEventHandler("subscribe", data -> {
+            return new StatusMessageEventResponse("subscribed");
         });
 
         return sockJSHandler;

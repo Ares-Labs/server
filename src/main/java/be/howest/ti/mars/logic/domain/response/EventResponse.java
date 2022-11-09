@@ -1,4 +1,4 @@
-package be.howest.ti.mars.logic.domain;
+package be.howest.ti.mars.logic.domain.response;
 
 import be.howest.ti.mars.web.bridge.BasicMessage;
 
@@ -6,10 +6,16 @@ import java.util.Map;
 
 public class EventResponse extends BasicMessage {
     private final String type;
+    private String channel;
     private final Map<String, String> data;
 
     public EventResponse(String type, Map<String, String> data) {
+        this(type, data, null);
+    }
+
+    public EventResponse(String type, Map<String, String> data, String channel) {
         this.type = type;
+        this.channel = channel;
         this.data = data;
     }
 
@@ -21,5 +27,15 @@ public class EventResponse extends BasicMessage {
     @Override
     public Map<String, String> getJsonData() {
         return data;
+    }
+
+    @Override
+    public String getChannel() {
+        return channel;
+    }
+
+    @Override
+    public void setChannel(String channel) {
+        this.channel = channel;
     }
 }
