@@ -1,7 +1,5 @@
 package be.howest.ti.mars.web.bridge;
 
-import be.howest.ti.mars.logic.controller.DefaultMarsController;
-import be.howest.ti.mars.logic.controller.MarsController;
 import be.howest.ti.mars.web.exceptions.MalformedRequestException;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
@@ -26,7 +24,6 @@ import java.util.logging.Logger;
  */
 public class MarsOpenApiBridge {
     private static final Logger LOGGER = Logger.getLogger(MarsOpenApiBridge.class.getName());
-    private final MarsController controller;
 
     public Router buildRouter(RouterBuilder routerBuilder) {
         LOGGER.log(Level.INFO, "Installing cors handlers");
@@ -41,14 +38,6 @@ public class MarsOpenApiBridge {
 
         LOGGER.log(Level.INFO, "All handlers are installed, creating router.");
         return routerBuilder.createRouter();
-    }
-
-    public MarsOpenApiBridge() {
-        this.controller = new DefaultMarsController();
-    }
-
-    public MarsOpenApiBridge(MarsController controller) {
-        this.controller = controller;
     }
 
     private void onFailedRequest(RoutingContext ctx) {
