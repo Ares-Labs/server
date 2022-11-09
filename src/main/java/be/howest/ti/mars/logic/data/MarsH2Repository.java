@@ -99,6 +99,9 @@ To make this class useful, please complete it with the topics seen in the module
  */
 
 public class MarsH2Repository {
+    public static final String SQL_ADD_PROPERTY = "INSERT INTO properties (location,  tier, description) VALUES (?, ?, ?);";
+    public static final String SQL_REMOVE_PROPERTY = "DELETE FROM properties WHERE id = ?;";
+    public static final String SQL_GET_PROPERTY = "SELECT * FROM properties WHERE id = ?;";
     private static final Logger LOGGER = Logger.getLogger(MarsH2Repository.class.getName());
     private final Server dbWebConsole;
     private final String username;
@@ -118,6 +121,65 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "DB configuration failed", ex);
             throw new RepositoryException("Could not configure MarsH2repository");
+        }
+    }
+
+    public void insertProperty(String location, int tier, int x, int y, int width, int height) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL_ADD_PROPERTY)) {
+            stmt.setString(1, location);
+            stmt.setInt(2, tier);
+            stmt.setInt(3, x);
+            stmt.setInt(4, y);
+            stmt.setInt(5, width);
+            stmt.setInt(6, height);
+
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not insert property", ex);
+            throw new RepositoryException("Could not insert property");
+        }
+    }
+
+    public JsonObject getProperty(String location) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL_GET_PROPERTY)) {
+            stmt.setString(1, location);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new JsonObject()
+                            .put("id", rs.getInt("id"))
+                            .put("location", rs.getString("location"))
+                            .put("description", rs.getString("description"))
+                            .put("tier", rs.getInt("tier"))
+                            .put("x", rs.getInt("x"))
+                            .put("y", rs.getInt("y"))
+                            .put("width", rs.getInt("width"))
+                            .put("height", rs.getInt("height"));
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get property", ex);
+            throw new RepositoryException("Could not get property");
+        }
+    }
+
+    public void removeProperty(String location) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(SQL_REMOVE_PROPERTY)) {
+            stmt.setString(1, location);
+
+            int affectedRows = stmt.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new RepositoryException("No property found with location: " + location);
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not remove property", ex);
+            throw new RepositoryException("Could not remove property");
         }
     }
 
