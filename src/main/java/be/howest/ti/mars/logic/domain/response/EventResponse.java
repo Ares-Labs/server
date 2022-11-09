@@ -2,6 +2,7 @@ package be.howest.ti.mars.logic.domain.response;
 
 import be.howest.ti.mars.web.bridge.BasicMessage;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class EventResponse extends BasicMessage {
@@ -16,7 +17,7 @@ public class EventResponse extends BasicMessage {
     public EventResponse(String type, Map<String, String> data, String channel) {
         this.type = type;
         this.channel = channel;
-        this.data = data;
+        this.data = new HashMap<>(data);
     }
 
     @Override
@@ -37,5 +38,10 @@ public class EventResponse extends BasicMessage {
     @Override
     public void setChannel(String channel) {
         this.channel = channel;
+    }
+
+    @Override
+    public void setRequestIdentifier(String requestIdentifier) {
+        data.put("requestIdentifier", requestIdentifier);
     }
 }

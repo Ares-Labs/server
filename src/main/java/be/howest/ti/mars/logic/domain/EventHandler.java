@@ -42,6 +42,18 @@ public class EventHandler {
         }
         errorIfNull(data, "No data specified in message");
 
-        return handler.apply(data);
+        String requestIdentifier = data.getString("requestIdentifier");
+
+        if (requestIdentifier != null) {
+            data.remove("requestIdentifier");
+        }
+
+        SocketResponse response = handler.apply(data);
+
+        if (requestIdentifier != null) {
+            response.setRequestIdentifier(requestIdentifier);
+        }
+
+        return response;
     }
 }

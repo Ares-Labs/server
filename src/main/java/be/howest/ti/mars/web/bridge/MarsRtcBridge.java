@@ -44,13 +44,12 @@ public class MarsRtcBridge {
 
         try {
             response = eh.handleIncomingEvent(new JsonObject(msg.body()));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             response = new ErrorEventResponse(e.getMessage());
         }
 
         if (response != null) {
             String out = response.getChannel() != null ? response.getChannel() : address;
-
             eb.publish(out, response.toMessage());
         }
     }
@@ -79,10 +78,6 @@ public class MarsRtcBridge {
             SocketResponse res = new StatusMessageEventResponse("created");
             res.setChannel(out);
             return res;
-        });
-
-        EventHandler.getInstance().addEventHandler("subscribe", data -> {
-            return new StatusMessageEventResponse("subscribed");
         });
 
         return sockJSHandler;
