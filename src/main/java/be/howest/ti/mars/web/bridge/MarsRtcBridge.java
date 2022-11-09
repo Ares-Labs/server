@@ -1,6 +1,7 @@
 package be.howest.ti.mars.web.bridge;
 
 import be.howest.ti.mars.logic.domain.EventHandler;
+import be.howest.ti.mars.logic.domain.events.Properties;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import io.vertx.core.Vertx;
@@ -69,17 +70,23 @@ public class MarsRtcBridge {
 
         eb.consumer(INBOUND, this::handlePublicConsumerMessage);
 
-        // Session event bus initialisation
-        EventHandler.getInstance().addEventHandler("session", data -> {
-            String id = data.getString("id");
-            String out = formatAddress(OUTBOUND, id);
-            eb.consumer(formatAddress(INBOUND, id), (Message<String> msg) -> handleConsumerMessage(out, msg));
+        EventHandler eh = EventHandler.getInstance();
 
-            SocketResponse res = new StatusMessageEventResponse("created");
-            res.setChannel(out);
-            return res;
-        });
+        eh.addEventHandler("session", this::addNewSession);
+        eh.addEventHandler("queries.add-property", Properties::addProperty);
+        eh.addEventHandler("queries.remove-property", Properties::removeProperty);
 
         return sockJSHandler;
+    }
+
+    private SocketResponse addNewSession(JsonObject data) {
+        // Session event bus initialisation
+        String id = data.getString("id");
+        String out = formatAddress(OUTBOUND, id);
+        eb.consumer(formatAddress(INBOUND, id), (Message<String> msg) -> handleConsumerMessage(out, msg));
+
+        SocketResponse res = new StatusMessageEventResponse("created");
+        res.setChannel(out);
+        return res;
     }
 }
