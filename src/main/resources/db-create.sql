@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users
+CREATE TABLE IF NOT EXISTS `users`
 (
     id        VARCHAR(36) NOT NULL PRIMARY KEY,
     full_name VARCHAR(64) NOT NULL
@@ -13,13 +13,14 @@ CREATE TABLE IF NOT EXISTS `tiers`
 
 CREATE TABLE IF NOT EXISTS `properties`
 (
-    location VARCHAR(64) NOT NULL PRIMARY KEY,
+    id       INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    location VARCHAR(64)                        NOT NULL,
     x        INTEGER,
     y        INTEGER,
     width    INTEGER,
     height   INTEGER,
 
-    tier     INTEGER     NOT NULL,
+    tier     INTEGER                            NOT NULL,
 
     FOREIGN KEY (tier) REFERENCES tiers (id)
         ON DELETE CASCADE
@@ -28,15 +29,15 @@ CREATE TABLE IF NOT EXISTS `properties`
 
 CREATE TABLE IF NOT EXISTS `user_properties`
 (
-    user_id           VARCHAR(36) NOT NULL,
-    property_location VARCHAR(64) NOT NULL,
+    user_id     VARCHAR(36) NOT NULL,
+    property_id INTEGER     NOT NULL,
 
-    PRIMARY KEY (user_id, property_location),
+    PRIMARY KEY (user_id, property_id),
 
     FOREIGN KEY (user_id) REFERENCES users (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (property_location) REFERENCES properties (location)
+    FOREIGN KEY (property_id) REFERENCES properties (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
@@ -44,10 +45,10 @@ CREATE TABLE IF NOT EXISTS `user_properties`
 CREATE TABLE IF NOT EXISTS `property_whitelists`
 (
     user_id           VARCHAR(36) NOT NULL,
-    property_location VARCHAR(64) NOT NULL,
+    property_id INTEGER NOT NULL,
 
-    PRIMARY KEY (property_location, user_id),
-    FOREIGN KEY (property_location) REFERENCES properties (location)
+    PRIMARY KEY (user_id, property_id),
+    FOREIGN KEY (property_id) REFERENCES properties (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -66,10 +67,10 @@ CREATE TABLE IF NOT EXISTS `installed_equipment`
     id                INTEGER      NOT NULL AUTO_INCREMENT PRIMARY KEY,
     description       VARCHAR(255) NOT NULL,
 
-    property_location VARCHAR(64)  NOT NULL,
+    property_id INTEGER  NOT NULL,
     type              INTEGER      NOT NULL,
 
-    FOREIGN KEY (property_location) REFERENCES properties (location)
+    FOREIGN KEY (property_id) REFERENCES properties (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY (type) REFERENCES equipment_types (type)
@@ -83,12 +84,12 @@ CREATE TABLE IF NOT EXISTS `alerts`
     timestamp         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     user_id           VARCHAR(36) NOT NULL,
-    property_location VARCHAR(64) NOT NULL,
+    property_id INTEGER NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (property_location) REFERENCES properties (location)
+    FOREIGN KEY (property_id) REFERENCES properties (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
