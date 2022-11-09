@@ -1,6 +1,7 @@
 package be.howest.ti.mars.logic.data;
 
 import be.howest.ti.mars.logic.exceptions.RepositoryException;
+import io.vertx.core.json.JsonObject;
 import org.h2.tools.Server;
 
 import java.io.IOException;
@@ -162,5 +163,27 @@ public class MarsH2Repository {
 
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, username, password);
+    }
+
+    public JsonObject getAllowedUsers(String propertyId) {
+        // Get whitelisted users of a property
+        try (
+                Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(
+                        "SELECT * FROM users WHERE id IN (SELECT user_id FROM property_whitelists WHERE property_id = ?)"
+                )
+        ) {
+            stmt.setString(1, propertyId);
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            while (rs.next()) {
+                result.put(rs.getString("id"), rs.getString("full_name"));
+            }
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get allowed users.", ex);
+            throw new RepositoryException("Could not get allowed users.");
+        }
+
     }
 }
