@@ -37,6 +37,7 @@ enum Queries {
     SQL_GET_EQUIPMENT_PROPERTY("SELECT * FROM installed_equipment WHERE property_id = ?;"),
     SQL_REMOVE_EQUIPMENT_PROPERTY("DELETE FROM installed_equipment WHERE property_id = ? AND id = ?;"),
     SQL_GET_EQUIPMENT_TYPES("SELECT * FROM equipment_types;"),
+    SQL_GET_USER("SELECT * FROM users WHERE id = ?;"),
     ;
 
     private final String query;
@@ -477,6 +478,24 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not get equipment types.", ex);
             throw new RepositoryException("Could not get equipment types.");
+        }
+    }
+
+    public JsonObject getUser(String userId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_USER.getQuery())) {
+            stmt.setString(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+
+            if (rs.next()) {
+                result.put("id", rs.getString("id"));
+                result.put("fullName", rs.getString("full_name"));
+            }
+
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get user.", ex);
+            throw new RepositoryException("Could not get user.");
         }
     }
 }
