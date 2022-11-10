@@ -11,12 +11,12 @@ import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonObject;
 
 public class Properties {
+    private static MarsH2Repository repo = Repositories.getH2Repo();
+
     private Properties() {
     }
 
     public static SocketResponse addProperty(JsonObject data) {
-        MarsH2Repository repo = Repositories.getH2Repo();
-
         String location = Utils.getOrThrowString(data, "location");
         int tier = Utils.getOrThrowInt(data, "tier");
         int x = Utils.getOrThrowInt(data, "x");
@@ -26,14 +26,13 @@ public class Properties {
         String description = Utils.getOrThrowString(data, "description");
         String clientId = Utils.getOrThrowString(data, "clientId");
         String status = "PENDING";
+
         repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
 
         return new StatusMessageEventResponse("Property added");
     }
 
     public static SocketResponse removeProperty(JsonObject data) {
-        MarsH2Repository repo = Repositories.getH2Repo();
-
         int id = Utils.getOrThrowInt(data, "id");
         repo.removeProperty(id);
 
@@ -41,22 +40,20 @@ public class Properties {
     }
 
     public static SocketResponse getProperty(JsonObject data) {
-        MarsH2Repository repo = Repositories.getH2Repo();
-
         int id = Utils.getOrThrowInt(data, "id");
         return new DataEventResponse("get-property", repo.getProperty(id));
     }
 
-    public static SocketResponse getAllowedUsers(JsonObject data) {
-        MarsH2Repository repo = Repositories.getH2Repo();
+    public static SocketResponse changePropertyStatus(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
 
+    public static SocketResponse getAllowedUsers(JsonObject data) {
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         return new DataEventResponse("get-allowed-users", repo.getAllowedUsers(propertyId));
     }
 
     public static SocketResponse addAllowedUser(JsonObject data) {
-        MarsH2Repository repo = Repositories.getH2Repo();
-
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
         boolean success = repo.addAllowedUser(propertyId, userId);
