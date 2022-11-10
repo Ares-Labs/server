@@ -134,11 +134,6 @@ public class Properties {
         return new DataEventResponse("get-scanned-visitors", repo.getScannedVisitors(propertyId, from, to));
     }
 
-    /// Should emit `events.scanned`
-    public static SocketResponse addScannedVisitor(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
-    }
-
     public static SocketResponse getAuthEntries(JsonObject data) {
         // Get entries of authorizations for specific property
         String propertyId = Utils.getOrThrowString(data, "propertyId");

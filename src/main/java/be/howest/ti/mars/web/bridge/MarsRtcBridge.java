@@ -105,12 +105,10 @@ public class MarsRtcBridge {
 
         eh.addEventHandler("queries.get-weekly-visitors", Properties::getWeeklyVisitors);
         eh.addEventHandler("queries.add-visitor", Properties::addVisitor);
+        eh.addEventHandler("queries.get-scanned-visitors", Properties::getScannedVisitors);
 
         eh.addEventHandler("queries.get-crimes-in-area", Properties::getCrimesInArea);
         eh.addEventHandler("queries.add-crime", Properties::addCrime);
-
-        eh.addEventHandler("queries.get-scanned-visitors", Properties::getScannedVisitors);
-        eh.addEventHandler("queries.add-scanned-visitor", Properties::addScannedVisitor);
 
         eh.addEventHandler("queries.get-auth-entries", Properties::getAuthEntries);
         eh.addEventHandler("queries.add-auth-entry", Properties::addAuthEntry);
