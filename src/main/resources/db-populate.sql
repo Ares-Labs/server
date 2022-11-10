@@ -43,3 +43,9 @@ INSERT INTO alerts (user_id, property_id)
 VALUES ('bedb80fc-55f3-11ed-b681-07688aa63f8a', 1),
        ('bedb80fc-55f3-11ed-b681-07688aa63f8a', 2),
        ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 2);
+
+-- Add some scans
+INSERT INTO scans (user_id, property_id, camera_id)
+VALUES ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 1, 1),
+       ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 1, 2),
+       ('bedb80fc-55f3-11ed-b681-07688aa63f8a', 2, 4);
