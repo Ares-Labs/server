@@ -153,10 +153,10 @@ public class MarsH2Repository {
         }
     }
 
-    public JsonObject getProperty(String location) {
+    public JsonObject getProperty(int locationId) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(SQL_GET_PROPERTY)) {
-            stmt.setString(1, location);
+            stmt.setInt(1, locationId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -179,10 +179,10 @@ public class MarsH2Repository {
         }
     }
 
-    public void removeProperty(String location) {
+    public void removeProperty(int location) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(SQL_REMOVE_PROPERTY)) {
-            stmt.setString(1, location);
+            stmt.setInt(1, location);
 
             int affectedRows = stmt.executeUpdate();
 

@@ -5,6 +5,7 @@ import be.howest.ti.mars.logic.data.Repositories;
 import be.howest.ti.mars.logic.domain.Utils;
 import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
+import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import be.howest.ti.mars.logic.exceptions.RepositoryException;
 import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonObject;
@@ -28,17 +29,33 @@ public class Properties {
             String status = "PENDING";
             repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
 
-        } catch (RepositoryException ex) {}
+        } catch (RepositoryException ex) {
+        }
         return new ErrorEventResponse("Not implemented yet");
     }
 
     public static SocketResponse removeProperty(JsonObject data) {
-        return new ErrorEventResponse("Not implemented yet");
+        try {
+            MarsH2Repository repo = Repositories.getH2Repo();
+
+            int id = Utils.getOrThrowInt(data, "id");
+            repo.removeProperty(id);
+
+            return new StatusMessageEventResponse("Property removed");
+        } catch (RepositoryException ex) {
+            return new ErrorEventResponse(ex.getMessage());
+        }
     }
 
     public static SocketResponse getProperty(JsonObject data) {
-        Subscriptions.emit("events.alerts", new JsonObject().put("message", "Got a property"));
-        return new ErrorEventResponse("Not implemented yet");
+        try {
+            MarsH2Repository repo = Repositories.getH2Repo();
+
+            int id = Utils.getOrThrowInt(data, "id");
+            return new DataEventResponse("get-property", repo.getProperty(id));
+        } catch (RepositoryException ex) {
+            return new ErrorEventResponse(ex.getMessage());
+        }
     }
 
     public static SocketResponse getAllowedUsers(JsonObject data) {
