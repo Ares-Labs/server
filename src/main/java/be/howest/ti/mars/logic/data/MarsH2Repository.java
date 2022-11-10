@@ -1,6 +1,7 @@
 package be.howest.ti.mars.logic.data;
 
 import be.howest.ti.mars.logic.exceptions.RepositoryException;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.h2.tools.Server;
@@ -29,8 +30,11 @@ enum Queries {
     SQL_CHANGE_PROPERTY_SIZE("UPDATE properties SET width = ?, height = ? WHERE id = ?;"),
     SQL_GET_ALERTS("SELECT * FROM alerts WHERE property_id = ?;"),
     SQL_ADD_ALERT("INSERT INTO alerts (property_id, user_id) VALUES (?, ?);"),
-    SQL_GET_WEEKLY_VISITORS("SELECT COUNT(*) AS amount, DAY_OF_WEEK(timestamp) AS day_of_week, camera_id FROM scans WHERE DAY_OF_YEAR(timestamp) > DAY_OF_YEAR(NOW()) - 7 AND property_id = ? GROUP BY camera_id, DAY_OF_WEEK(timestamp);"),
-    SQL_GET_SCANNED_VISITORS("SELECT dayofweek(timestamp) AS day, count(*) AS count from scans where timestamp > ? AND timestamp < ? and property_id = ? GROUP BY day");
+    SQL_GET_WEEKLY_VISITORS("SELECT COUNT(*) AS amount, DAY_OF_WEEK(timestamp) AS day_of_week, camera_id, (SELECT description FROM installed_equipment WHERE id = camera_id LIMIT 1) as camera FROM scans WHERE DAY_OF_YEAR(timestamp) > DAY_OF_YEAR(NOW()) - 7 AND property_id = ? GROUP BY camera_id, DAY_OF_WEEK(timestamp);"),
+    SQL_GET_SCANNED_VISITORS("SELECT dayofweek(timestamp) AS day, count(*) AS count from scans where timestamp > ? AND timestamp < ? and property_id = ? GROUP BY day"),
+    SQL_ADD_VISITOR("INSERT INTO scans (user_id, property_id, camera_id) VALUES (?, ?, ?);"),
+    SQL_ADD_EQUIPMENT_PROPERTY("INSERT INTO installed_equipment (type, property_id, description) VALUES (?, ?, ?);"),
+    ;
 
     private final String query;
 
@@ -373,21 +377,55 @@ public class MarsH2Repository {
             JsonObject result = new JsonObject();
 
             while (rs.next()) {
+                String camera = rs.getString("camera");
                 int cameraId = rs.getInt("camera_id");
                 int day = rs.getInt("day_of_week");
                 int count = rs.getInt("amount");
 
                 if (!result.containsKey(String.valueOf(cameraId))) {
-                    result.put(String.valueOf(cameraId), new JsonObject());
+                    JsonObject content = new JsonObject();
+                    content.put("data", new JsonObject());
+                    content.put("name", camera);
+                    result.put(String.valueOf(cameraId), content);
                 }
 
-                result.getJsonObject(String.valueOf(cameraId)).put(String.valueOf(day), count);
+                result.getJsonObject(String.valueOf(cameraId)).getJsonObject("data").put(String.valueOf(day), count);
             }
 
             return result;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not get weekly visitors.", ex);
             throw new RepositoryException("Could not get weekly visitors.");
+        }
+    }
+
+    public boolean addVisitor(String userId, int propertyId, int cameraId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_VISITOR.getQuery())) {
+            stmt.setString(1, userId);
+            stmt.setInt(2, propertyId);
+            stmt.setInt(3, cameraId);
+
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not add visitor.", ex);
+            throw new RepositoryException("Could not add visitor.");
+        }
+    }
+
+    public int addEquipmentProperty(int propertyId, int equipmentType, String description) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_EQUIPMENT_PROPERTY.getQuery(), Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, equipmentType);
+            stmt.setInt(2, propertyId);
+            stmt.setString(3, description);
+
+            stmt.executeUpdate();
+
+            stmt.getGeneratedKeys().next();
+            return stmt.getGeneratedKeys().getInt(1);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not add equipment property.", ex);
+            throw new RepositoryException("Could not add equipment property.");
         }
     }
 }

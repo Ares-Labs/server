@@ -104,7 +104,17 @@ public class Properties {
 
     /// Should emit `events.visits`
     public static SocketResponse addVisitor(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        String userId = Utils.getOrThrowString(data, "userId");
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        int cameraId = Utils.getOrThrowInt(data, "cameraId");
+
+        boolean success = repo.addVisitor(userId, propertyId, cameraId);
+
+        if (success) {
+            Subscriptions.emit("events.visits", new JsonObject().put("propertyId", propertyId).put("clientId", userId));
+        }
+
+        return new SuccessEventResponse("add-visitor", success);
     }
 
     public static SocketResponse getCrimesInArea(JsonObject data) {
@@ -142,5 +152,25 @@ public class Properties {
         String userId = Utils.getOrThrowString(data, "userId");
         boolean success = repo.addAuthEntry(propertyId, userId);
         return new SuccessEventResponse("add-auth-entry", success);
+    }
+
+    public static SocketResponse addEquipmentProperty(JsonObject data) {
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        int equipmentType = Utils.getOrThrowInt(data, "equipmentType");
+        String description = Utils.getOrThrowString(data, "description");
+
+        int id = repo.addEquipmentProperty(propertyId, equipmentType, description);
+
+        return new DataEventResponse("add-equipment", new JsonObject().put("id", id));
+    }
+
+    /// Should emit `events.property-equipment-change`
+    public static SocketResponse removeEquipmentProperty(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    /// Should emit `events.property-equipment-change`
+    public static SocketResponse getEquipmentProperty(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
     }
 }

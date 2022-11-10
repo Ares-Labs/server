@@ -1,8 +1,10 @@
 package be.howest.ti.mars.web.bridge;
 
 import be.howest.ti.mars.logic.domain.EventHandler;
+import be.howest.ti.mars.logic.domain.events.Equipment;
 import be.howest.ti.mars.logic.domain.events.Properties;
 import be.howest.ti.mars.logic.domain.events.Subscriptions;
+import be.howest.ti.mars.logic.domain.events.Users;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import io.vertx.core.Vertx;
@@ -81,13 +83,18 @@ public class MarsRtcBridge {
         eh.addEventHandler("session", this::addNewSession);
         eh.addEventHandler("subscribe", Subscriptions::subscribe);
 
+        eh.addEventHandler("queries.get-user", Users::getUser);
+        eh.addEventHandler("get-equipment-types", Equipment::getTypes);
+
         eh.addEventHandler("queries.add-property", Properties::addProperty);
         eh.addEventHandler("queries.remove-property", Properties::removeProperty);
         eh.addEventHandler("queries.get-property", Properties::getProperty);
         eh.addEventHandler("queries.change-property-size", Properties::changePropertySize);
         eh.addEventHandler("queries.change-property-status", Properties::changePropertyStatus);
-
         eh.addEventHandler("queries.get-pending-properties", Properties::getPendingProperties);
+        eh.addEventHandler("queries.add-equipment-property", Properties::addEquipmentProperty);
+        eh.addEventHandler("queries.remove-equipment-property", Properties::removeEquipmentProperty);
+        eh.addEventHandler("queries.get-equipment-property", Properties::getEquipmentProperty);
 
         eh.addEventHandler("queries.get-allowed-users", Properties::getAllowedUsers);
         eh.addEventHandler("queries.add-allowed-user", Properties::addAllowedUser);
