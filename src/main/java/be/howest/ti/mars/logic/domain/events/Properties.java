@@ -79,6 +79,7 @@ public class Properties {
 
     /// Should emit `events.alerts`
     public static SocketResponse addAlert(JsonObject data) {
+        Subscriptions.emit("events.alerts", new JsonObject().put("message", "Alert added"));
         return new ErrorEventResponse("Not implemented");
     }
 
