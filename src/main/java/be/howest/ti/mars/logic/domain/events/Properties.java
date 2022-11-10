@@ -44,4 +44,17 @@ public class Properties {
             return new ErrorEventResponse(ex.getMessage());
         }
     }
+
+    public static SocketResponse addAllowedUser(JsonObject data) {
+        try {
+            MarsH2Repository repo = Repositories.getH2Repo();
+
+            String propertyId = Utils.getOrThrowString(data, "propertyId");
+            String userId = Utils.getOrThrowString(data, "userId");
+            boolean success = repo.addAllowedUser(propertyId, userId);
+            return new DataEventResponse("add-allowed-user", new JsonObject().put("success", success));
+        } catch (RepositoryException ex) {
+            return new ErrorEventResponse(ex.getMessage());
+        }
+    }
 }

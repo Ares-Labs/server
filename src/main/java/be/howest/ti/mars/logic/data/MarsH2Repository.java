@@ -246,4 +246,22 @@ public class MarsH2Repository {
         }
 
     }
+
+    public boolean addAllowedUser(String propertyId, String userId) {
+        // Add a user to the whitelist of a property
+        try (
+                Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"
+                )
+        ) {
+            stmt.setString(1, propertyId);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not add allowed user.", ex);
+            throw new RepositoryException("Could not add allowed user.");
+        }
+    }
 }
