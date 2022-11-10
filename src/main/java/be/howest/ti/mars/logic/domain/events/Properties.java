@@ -116,6 +116,10 @@ public class Properties {
 
     /// Should emit `events.auth-entries`
     public static SocketResponse addAuthEntry(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        // Update entries when someone enters a property
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        String userId = Utils.getOrThrowString(data, "userId");
+        boolean success = repo.addAuthEntry(propertyId, userId);
+        return new SuccessEventResponse("add-auth-entry", success);
     }
 }

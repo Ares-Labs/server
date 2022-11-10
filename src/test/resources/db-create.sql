@@ -6,6 +6,7 @@ drop table if exists `property_whitelists`;
 drop table if exists `equipment_types`;
 drop table if exists `installed_equipment`;
 drop table if exists `alerts`;
+drop table if exists `authorisations`;
 
 CREATE TABLE IF NOT EXISTS `users`
 (
@@ -91,6 +92,22 @@ CREATE TABLE IF NOT EXISTS `installed_equipment`
 CREATE TABLE IF NOT EXISTS `alerts`
 (
     id          INTEGER     NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    timestamp   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    user_id     VARCHAR(36) NOT NULL,
+    property_id INTEGER     NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (property_id) REFERENCES properties (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS `authorisations`
+(
     timestamp   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     user_id     VARCHAR(36) NOT NULL,

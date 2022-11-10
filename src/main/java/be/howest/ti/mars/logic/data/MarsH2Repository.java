@@ -21,6 +21,7 @@ enum Queries {
     SQL_ADD_PROPERTY_WHITELIST("INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"),
     SQL_REMOVE_PROPERTY_WHITELIST("DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"),
     SQL_CHANGE_PROPERTY_STATUS("UPDATE properties SET status = ? WHERE id = ?;"),
+    SQL_ADD_AUTH_ENTRY("INSERT INTO authorizations (property_id, user_id) VALUES (?, ?);"),
     ;
 
     private final String query;
@@ -213,6 +214,19 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not change property status.", ex);
             throw new RepositoryException("Could not change property status.");
+        }
+    }
+
+    public boolean addAuthEntry(String propertyId, String userId) {
+        // Add an entry to the auth table
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_AUTH_ENTRY.getQuery())) {
+            stmt.setString(1, propertyId);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not add auth entry.", ex);
+            throw new RepositoryException("Could not add auth entry.");
         }
     }
 }
