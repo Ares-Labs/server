@@ -30,29 +30,28 @@ public class Properties {
     }
 
     public static SocketResponse removeProperty(JsonObject data) {
-        int id = Utils.getOrThrowInt(data, "id");
-        repo.removeProperty(id);
-        return new StatusMessageEventResponse("Property removed");
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        return new SuccessEventResponse("remove-property", repo.removeProperty(propertyId));
     }
 
     public static SocketResponse getProperty(JsonObject data) {
-        int id = Utils.getOrThrowInt(data, "id");
-        return new DataEventResponse("get-property", repo.getProperty(id));
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        return new DataEventResponse("get-property", repo.getProperty(propertyId));
     }
 
     public static SocketResponse changePropertyStatus(JsonObject data) {
-        int id = Utils.getOrThrowInt(data, "id");
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
         String status = Utils.getOrThrowString(data, "status");
-        boolean success = repo.changePropertyStatus(id, status);
+        boolean success = repo.changePropertyStatus(propertyId, status);
         return new SuccessEventResponse("change-property-status", success);
     }
 
     public static SocketResponse changePropertySize(JsonObject data) {
-        int id = Utils.getOrThrowInt(data, "id");
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
         int width = Utils.getOrThrowInt(data, "width");
         int height = Utils.getOrThrowInt(data, "height");
 
-        boolean success = repo.changePropertySize(id, width, height);
+        boolean success = repo.changePropertySize(propertyId, width, height);
         return new SuccessEventResponse("change-property-size", success);
     }
 
@@ -80,13 +79,22 @@ public class Properties {
     }
 
     public static SocketResponse getAlerts(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        return new DataEventResponse("get-alerts", repo.getAlerts(propertyId));
     }
 
     /// Should emit `events.alerts`
     public static SocketResponse addAlert(JsonObject data) {
-        Subscriptions.emit("events.alerts", new JsonObject().put("message", "Alert added"));
-        return new ErrorEventResponse("Not implemented");
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        String userId = Utils.getOrThrowString(data, "userId");
+
+        boolean success = repo.addAlert(propertyId, userId);
+
+        if (success) {
+            Subscriptions.emit("events.alerts", new JsonObject().put("propertyId", propertyId).put("user", userId));
+        }
+
+        return new SuccessEventResponse("add-alert", success);
     }
 
     public static SocketResponse getWeeklyVisitors(JsonObject data) {
