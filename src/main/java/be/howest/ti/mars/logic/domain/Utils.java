@@ -10,7 +10,11 @@ public class Utils {
 
     private static <T> T getOrThrow(JsonObject data, String key, Function<JsonObject, T> getter) {
         if (data.containsKey(key)) {
-            return getter.apply(data);
+            try {
+                return getter.apply(data);
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException("Invalid type for key " + key);
+            }
         } else {
             throw new IllegalArgumentException("Missing key: " + key);
         }

@@ -98,7 +98,8 @@ public class Properties {
     }
 
     public static SocketResponse getWeeklyVisitors(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        return new DataEventResponse("get-weekly-visitors", repo.getWeeklyVisitors(propertyId));
     }
 
     /// Should emit `events.visits`

@@ -29,6 +29,7 @@ enum Queries {
     SQL_CHANGE_PROPERTY_SIZE("UPDATE properties SET width = ?, height = ? WHERE id = ?;"),
     SQL_GET_ALERTS("SELECT * FROM alerts WHERE property_id = ?;"),
     SQL_ADD_ALERT("INSERT INTO alerts (property_id, user_id) VALUES (?, ?);"),
+    SQL_GET_WEEKLY_VISITORS("SELECT COUNT(*) AS amount, DAY_OF_WEEK(timestamp) AS day_of_week, camera_id FROM scans WHERE DAY_OF_YEAR(timestamp) > DAY_OF_YEAR(NOW()) - 7 AND property_id = ? GROUP BY camera_id, DAY_OF_WEEK(timestamp);"),
     SQL_GET_SCANNED_VISITORS("SELECT dayofweek(timestamp) AS day, count(*) AS count from scans where timestamp > ? AND timestamp < ? and property_id = ? GROUP BY day");
 
     private final String query;
@@ -340,7 +341,6 @@ public class MarsH2Repository {
         }
     }
 
-
     public JsonObject getScannedVisitors(String propertyId, String from, String to) {
         // Get scanned visitors for a property between two dates
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_SCANNED_VISITORS.getQuery())) {
@@ -363,6 +363,31 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not get scanned visitors.", ex);
             throw new RepositoryException("Could not get scanned visitors.");
+        }
+    }
+
+    public JsonObject getWeeklyVisitors(int propertyId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_WEEKLY_VISITORS.getQuery())) {
+            stmt.setInt(1, propertyId);
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+
+            while (rs.next()) {
+                int cameraId = rs.getInt("camera_id");
+                int day = rs.getInt("day_of_week");
+                int count = rs.getInt("amount");
+
+                if (!result.containsKey(String.valueOf(cameraId))) {
+                    result.put(String.valueOf(cameraId), new JsonObject());
+                }
+
+                result.getJsonObject(String.valueOf(cameraId)).put(String.valueOf(day), count);
+            }
+
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get weekly visitors.", ex);
+            throw new RepositoryException("Could not get weekly visitors.");
         }
     }
 }
