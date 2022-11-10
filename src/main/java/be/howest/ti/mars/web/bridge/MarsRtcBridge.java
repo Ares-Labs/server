@@ -84,8 +84,25 @@ public class MarsRtcBridge {
         eh.addEventHandler("queries.add-property", Properties::addProperty);
         eh.addEventHandler("queries.remove-property", Properties::removeProperty);
         eh.addEventHandler("queries.get-property", Properties::getProperty);
+
         eh.addEventHandler("queries.get-allowed-users", Properties::getAllowedUsers);
         eh.addEventHandler("queries.add-allowed-user", Properties::addAllowedUser);
+        eh.addEventHandler("queries.remove-allowed-user", Properties::removeAllowedUser);
+
+        eh.addEventHandler("queries.get-alerts",  Properties::getAlerts);
+        eh.addEventHandler("queries.add-alert",  Properties::addAlert);
+
+        eh.addEventHandler("queries.get-weekly-visitors", Properties::getWeeklyVisitors);
+        eh.addEventHandler("queries.add-visitor", Properties::addVisitor);
+
+        eh.addEventHandler("queries.get-crimes-in-area", Properties::getCrimesInArea);
+        eh.addEventHandler("queries.add-crime", Properties::addCrime);
+
+        eh.addEventHandler("queries.get-scanned-visitors", Properties::getScannedVisitors);
+        eh.addEventHandler("queries.add-scanned-visitor", Properties::addScannedVisitor);
+
+        eh.addEventHandler("queries.get-auth-entries", Properties::getAuthEntries);
+        eh.addEventHandler("queries.add-auth-entry", Properties::addAuthEntry);
 
         return sockJSHandler;
     }

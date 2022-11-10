@@ -82,4 +82,53 @@ public class Properties {
             return new ErrorEventResponse(ex.getMessage());
         }
     }
+
+    public static SocketResponse removeAllowedUser(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    public static SocketResponse getAlerts(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    /// Should emit `events.alerts`
+    public static SocketResponse addAlert(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    public static SocketResponse getWeeklyVisitors(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    /// Should emit `events.visits`
+    public static SocketResponse addVisitor(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    public static SocketResponse getCrimesInArea(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    /// Should emit `events.crimes`
+    public static SocketResponse addCrime(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    public static SocketResponse getScannedVisitors(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    /// Should emit `events.scanned`
+    public static SocketResponse addScannedVisitor(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    public static SocketResponse getAuthEntries(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    /// Should emit `events.auth-entries`
+    public static SocketResponse addAuthEntry(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
 }
