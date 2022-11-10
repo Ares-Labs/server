@@ -1,3 +1,12 @@
+drop table if exists `users`;
+drop table if exists `tiers`;
+drop table if exists `properties`;
+drop table if exists `user_properties`;
+drop table if exists `property_whitelists`;
+drop table if exists `equipment_types`;
+drop table if exists `installed_equipment`;
+drop table if exists `alerts`;
+
 CREATE TABLE IF NOT EXISTS `users`
 (
     id        VARCHAR(36) NOT NULL PRIMARY KEY,
@@ -19,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `properties`
     y           INTEGER,
     width       INTEGER,
     height      INTEGER,
-
+    status      VARCHAR(16)                        NOT NULL,
     tier        INTEGER                            NOT NULL,
     description VARCHAR(256),
 

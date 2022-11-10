@@ -19,9 +19,15 @@ public class Properties {
 
             String location = Utils.getOrThrowString(data, "location");
             int tier = Utils.getOrThrowInt(data, "tier");
+            int x = Utils.getOrThrowInt(data, "x");
+            int y = Utils.getOrThrowInt(data, "y");
+            int width = Utils.getOrThrowInt(data, "width");
+            int height = Utils.getOrThrowInt(data, "height");
             String description = Utils.getOrThrowString(data, "description");
-            // TODO: Ability to return the property ID
-            repo.insertProperty(location, tier, description);
+            String clientId = Utils.getOrThrowString(data, "clientId");
+            String status = "PENDING";
+            repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
+
         } catch (RepositoryException ex) {}
         return new ErrorEventResponse("Not implemented yet");
     }

@@ -99,7 +99,7 @@ To make this class useful, please complete it with the topics seen in the module
  */
 
 public class MarsH2Repository {
-    public static final String SQL_ADD_PROPERTY = "INSERT INTO properties (location,  tier, description) VALUES (?, ?, ?);";
+    public static final String SQL_ADD_PROPERTY = "INSERT INTO properties (location,  tier, x, y, width, height, status, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
     public static final String SQL_REMOVE_PROPERTY = "DELETE FROM properties WHERE id = ?;";
     public static final String SQL_GET_PROPERTY = "SELECT * FROM properties WHERE id = ?;";
     private static final Logger LOGGER = Logger.getLogger(MarsH2Repository.class.getName());
@@ -124,14 +124,29 @@ public class MarsH2Repository {
         }
     }
 
-    public void insertProperty(String location, int tier, String description) {
+    public void insertProperty(String clientId, String location, int tier, int x, int y, int width, int height, String status, String description) {
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SQL_ADD_PROPERTY)) {
+             PreparedStatement stmt = conn.prepareStatement(SQL_ADD_PROPERTY, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, location);
             stmt.setInt(2, tier);
-            stmt.setString(3, description);
+            stmt.setInt(3, x);
+            stmt.setInt(4, y);
+            stmt.setInt(5, width);
+            stmt.setInt(6, height);
+            stmt.setString(7, status);
+            stmt.setString(8, description);
 
             stmt.executeUpdate();
+
+            int returnedId = stmt.getGeneratedKeys().getInt(1);
+
+            // Add property to users properties
+            try (PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO user_properties (user_id, property_id) VALUES (?, ?);")) {
+                stmt2.setString(1, clientId);
+                stmt2.setInt(2, returnedId);
+                stmt2.executeUpdate();
+            }
+
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not insert property", ex);
             throw new RepositoryException("Could not insert property");
