@@ -29,9 +29,10 @@ public class Properties {
             String status = "PENDING";
             repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
 
+            return new StatusMessageEventResponse("Property added");
         } catch (RepositoryException ex) {
+            return new ErrorEventResponse(ex.getMessage());
         }
-        return new ErrorEventResponse("Not implemented yet");
     }
 
     public static SocketResponse removeProperty(JsonObject data) {
