@@ -279,4 +279,22 @@ public class MarsH2Repository {
             throw new RepositoryException("Could not add allowed user.");
         }
     }
+
+    public boolean removeAllowedUser(String propertyId, String userId) {
+        // Remove a user from the whitelist of a property
+        try (
+                Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(
+                        "DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"
+                )
+        ) {
+            stmt.setString(1, propertyId);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not remove allowed user.", ex);
+            throw new RepositoryException("Could not remove allowed user.");
+        }
+    }
 }

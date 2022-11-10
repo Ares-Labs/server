@@ -64,7 +64,12 @@ public class Properties {
     }
 
     public static SocketResponse removeAllowedUser(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        MarsH2Repository repo = Repositories.getH2Repo();
+
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        String userId = Utils.getOrThrowString(data, "userId");
+        boolean success = repo.removeAllowedUser(propertyId, userId);
+        return new DataEventResponse("remove-allowed-user", new JsonObject().put("success", success));
     }
 
     public static SocketResponse getAlerts(JsonObject data) {
