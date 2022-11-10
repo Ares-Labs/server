@@ -169,12 +169,11 @@ public class MarsH2Repository {
         }
     }
 
-    public boolean removeProperty(int location) {
+    public void removeProperty(int location) {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_PROPERTY.getQuery())) {
             stmt.setInt(1, location);
 
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not remove property", ex);
             throw new RepositoryException("Could not remove property");
@@ -199,52 +198,48 @@ public class MarsH2Repository {
 
     }
 
-    public boolean addAllowedUser(String propertyId, String userId) {
+    public void addAllowedUser(String propertyId, String userId) {
         // Add a user to the whitelist of a property
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_PROPERTY_WHITELIST.getQuery())) {
             stmt.setString(1, propertyId);
             stmt.setString(2, userId);
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not add allowed user.", ex);
             throw new RepositoryException("Could not add allowed user.");
         }
     }
 
-    public boolean removeAllowedUser(String propertyId, String userId) {
+    public void removeAllowedUser(String propertyId, String userId) {
         // Remove a user from the whitelist of a property
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_PROPERTY_WHITELIST.getQuery())) {
             stmt.setString(1, propertyId);
             stmt.setString(2, userId);
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not remove allowed user.", ex);
             throw new RepositoryException("Could not remove allowed user.");
         }
     }
 
-    public boolean changePropertyStatus(int id, String status) {
+    public void changePropertyStatus(int id, String status) {
         // Change the status of a property
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_CHANGE_PROPERTY_STATUS.getQuery())) {
             stmt.setString(1, status);
             stmt.setInt(2, id);
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not change property status.", ex);
             throw new RepositoryException("Could not change property status.");
         }
     }
 
-    public boolean addAuthEntry(String propertyId, String userId) {
+    public void addAuthEntry(String propertyId, String userId) {
         // Add an entry to the auth table
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_AUTH_ENTRY.getQuery())) {
             stmt.setString(1, propertyId);
             stmt.setString(2, userId);
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not add auth entry.", ex);
             throw new RepositoryException("Could not add auth entry.");
@@ -296,14 +291,13 @@ public class MarsH2Repository {
         }
     }
 
-    public boolean changePropertySize(int id, int width, int height) {
+    public void changePropertySize(int id, int width, int height) {
         // Change the size of a property
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_CHANGE_PROPERTY_SIZE.getQuery())) {
             stmt.setInt(1, width);
             stmt.setInt(2, height);
             stmt.setInt(3, id);
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not change property size.", ex);
             throw new RepositoryException("Could not change property size.");
@@ -333,12 +327,11 @@ public class MarsH2Repository {
         }
     }
 
-    public boolean addAlert(String propertyId, String user) {
+    public void addAlert(String propertyId, String user) {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_ALERT.getQuery())) {
             stmt.setString(1, propertyId);
             stmt.setString(2, user);
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not add alert.", ex);
             throw new RepositoryException("Could not add alert.");
@@ -399,14 +392,13 @@ public class MarsH2Repository {
         }
     }
 
-    public boolean addVisitor(String userId, int propertyId, int cameraId) {
+    public void addVisitor(String userId, int propertyId, int cameraId) {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_VISITOR.getQuery())) {
             stmt.setString(1, userId);
             stmt.setInt(2, propertyId);
             stmt.setInt(3, cameraId);
 
             stmt.executeUpdate();
-            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not add visitor.", ex);
             throw new RepositoryException("Could not add visitor.");

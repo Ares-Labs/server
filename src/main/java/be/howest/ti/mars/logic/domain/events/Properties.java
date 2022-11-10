@@ -31,7 +31,8 @@ public class Properties {
 
     public static SocketResponse removeProperty(JsonObject data) {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
-        return new SuccessEventResponse("remove-property", repo.removeProperty(propertyId));
+        repo.removeProperty(propertyId);
+        return new SuccessEventResponse("remove-property");
     }
 
     public static SocketResponse getProperty(JsonObject data) {
@@ -42,8 +43,8 @@ public class Properties {
     public static SocketResponse changePropertyStatus(JsonObject data) {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         String status = Utils.getOrThrowString(data, "status");
-        boolean success = repo.changePropertyStatus(propertyId, status);
-        return new SuccessEventResponse("change-property-status", success);
+        repo.changePropertyStatus(propertyId, status);
+        return new SuccessEventResponse("change-property-status");
     }
 
     public static SocketResponse changePropertySize(JsonObject data) {
@@ -51,8 +52,8 @@ public class Properties {
         int width = Utils.getOrThrowInt(data, "width");
         int height = Utils.getOrThrowInt(data, "height");
 
-        boolean success = repo.changePropertySize(propertyId, width, height);
-        return new SuccessEventResponse("change-property-size", success);
+        repo.changePropertySize(propertyId, width, height);
+        return new SuccessEventResponse("change-property-size");
     }
 
     public static SocketResponse getPendingProperties(JsonObject data) {
@@ -67,15 +68,15 @@ public class Properties {
     public static SocketResponse addAllowedUser(JsonObject data) {
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
-        boolean success = repo.addAllowedUser(propertyId, userId);
-        return new SuccessEventResponse("add-allowed-user", success);
+        repo.addAllowedUser(propertyId, userId);
+        return new SuccessEventResponse("add-allowed-user");
     }
 
     public static SocketResponse removeAllowedUser(JsonObject data) {
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
-        boolean success = repo.removeAllowedUser(propertyId, userId);
-        return new SuccessEventResponse("remove-allowed-user", success);
+        repo.removeAllowedUser(propertyId, userId);
+        return new SuccessEventResponse("remove-allowed-user");
     }
 
     public static SocketResponse getAlerts(JsonObject data) {
@@ -88,13 +89,10 @@ public class Properties {
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
 
-        boolean success = repo.addAlert(propertyId, userId);
+        repo.addAlert(propertyId, userId);
+        Subscriptions.emit("events.alerts", new JsonObject().put("propertyId", propertyId).put("user", userId));
 
-        if (success) {
-            Subscriptions.emit("events.alerts", new JsonObject().put("propertyId", propertyId).put("user", userId));
-        }
-
-        return new SuccessEventResponse("add-alert", success);
+        return new SuccessEventResponse("add-alert");
     }
 
     public static SocketResponse getWeeklyVisitors(JsonObject data) {
@@ -108,13 +106,10 @@ public class Properties {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         int cameraId = Utils.getOrThrowInt(data, "cameraId");
 
-        boolean success = repo.addVisitor(userId, propertyId, cameraId);
+        repo.addVisitor(userId, propertyId, cameraId);
+        Subscriptions.emit("events.visits", new JsonObject().put("propertyId", propertyId).put("clientId", userId));
 
-        if (success) {
-            Subscriptions.emit("events.visits", new JsonObject().put("propertyId", propertyId).put("clientId", userId));
-        }
-
-        return new SuccessEventResponse("add-visitor", success);
+        return new SuccessEventResponse("add-visitor");
     }
 
     public static SocketResponse getCrimesInArea(JsonObject data) {
@@ -145,10 +140,11 @@ public class Properties {
         // Update entries when someone enters a property
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
-        boolean success = repo.addAuthEntry(propertyId, userId);
-        return new SuccessEventResponse("add-auth-entry", success);
+        repo.addAuthEntry(propertyId, userId);
+        return new SuccessEventResponse("add-auth-entry");
     }
 
+    /// Should emit `events.property-equipment-change`
     public static SocketResponse addEquipmentProperty(JsonObject data) {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         int equipmentType = Utils.getOrThrowInt(data, "equipmentType");
@@ -164,7 +160,6 @@ public class Properties {
         return new ErrorEventResponse("Not implemented");
     }
 
-    /// Should emit `events.property-equipment-change`
     public static SocketResponse getEquipmentProperty(JsonObject data) {
         return new ErrorEventResponse("Not implemented");
     }
