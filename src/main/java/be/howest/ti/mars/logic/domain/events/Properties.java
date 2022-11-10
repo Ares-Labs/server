@@ -15,72 +15,52 @@ public class Properties {
     }
 
     public static SocketResponse addProperty(JsonObject data) {
-        try {
-            MarsH2Repository repo = Repositories.getH2Repo();
+        MarsH2Repository repo = Repositories.getH2Repo();
 
-            String location = Utils.getOrThrowString(data, "location");
-            int tier = Utils.getOrThrowInt(data, "tier");
-            int x = Utils.getOrThrowInt(data, "x");
-            int y = Utils.getOrThrowInt(data, "y");
-            int width = Utils.getOrThrowInt(data, "width");
-            int height = Utils.getOrThrowInt(data, "height");
-            String description = Utils.getOrThrowString(data, "description");
-            String clientId = Utils.getOrThrowString(data, "clientId");
-            String status = "PENDING";
-            repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
+        String location = Utils.getOrThrowString(data, "location");
+        int tier = Utils.getOrThrowInt(data, "tier");
+        int x = Utils.getOrThrowInt(data, "x");
+        int y = Utils.getOrThrowInt(data, "y");
+        int width = Utils.getOrThrowInt(data, "width");
+        int height = Utils.getOrThrowInt(data, "height");
+        String description = Utils.getOrThrowString(data, "description");
+        String clientId = Utils.getOrThrowString(data, "clientId");
+        String status = "PENDING";
+        repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
 
-            return new StatusMessageEventResponse("Property added");
-        } catch (RepositoryException ex) {
-            return new ErrorEventResponse(ex.getMessage());
-        }
+        return new StatusMessageEventResponse("Property added");
     }
 
     public static SocketResponse removeProperty(JsonObject data) {
-        try {
-            MarsH2Repository repo = Repositories.getH2Repo();
+        MarsH2Repository repo = Repositories.getH2Repo();
 
-            int id = Utils.getOrThrowInt(data, "id");
-            repo.removeProperty(id);
+        int id = Utils.getOrThrowInt(data, "id");
+        repo.removeProperty(id);
 
-            return new StatusMessageEventResponse("Property removed");
-        } catch (RepositoryException ex) {
-            return new ErrorEventResponse(ex.getMessage());
-        }
+        return new StatusMessageEventResponse("Property removed");
     }
 
     public static SocketResponse getProperty(JsonObject data) {
-        try {
-            MarsH2Repository repo = Repositories.getH2Repo();
+        MarsH2Repository repo = Repositories.getH2Repo();
 
-            int id = Utils.getOrThrowInt(data, "id");
-            return new DataEventResponse("get-property", repo.getProperty(id));
-        } catch (RepositoryException ex) {
-            return new ErrorEventResponse(ex.getMessage());
-        }
+        int id = Utils.getOrThrowInt(data, "id");
+        return new DataEventResponse("get-property", repo.getProperty(id));
     }
 
     public static SocketResponse getAllowedUsers(JsonObject data) {
-        try {
-            MarsH2Repository repo = Repositories.getH2Repo();
+        MarsH2Repository repo = Repositories.getH2Repo();
 
-            String propertyId = Utils.getOrThrowString(data, "propertyId");
-            return new DataEventResponse("get-allowed-users", repo.getAllowedUsers(propertyId));
-        } catch (RepositoryException ex) {
-            return new ErrorEventResponse(ex.getMessage());
-        }
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        return new DataEventResponse("get-allowed-users", repo.getAllowedUsers(propertyId));
     }
 
     public static SocketResponse addAllowedUser(JsonObject data) {
-        try {
-            MarsH2Repository repo = Repositories.getH2Repo();
+        MarsH2Repository repo = Repositories.getH2Repo();
 
-            String propertyId = Utils.getOrThrowString(data, "propertyId");
-            String userId = Utils.getOrThrowString(data, "userId");
-            boolean success = repo.addAllowedUser(propertyId, userId);
-            return new DataEventResponse("add-allowed-user", new JsonObject().put("success", success));
-        } catch (RepositoryException ex) {
-            return new ErrorEventResponse(ex.getMessage());
-        }
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        String userId = Utils.getOrThrowString(data, "userId");
+        boolean success = repo.addAllowedUser(propertyId, userId);
+        return new DataEventResponse("add-allowed-user", new JsonObject().put("success", success));
     }
 
     public static SocketResponse removeAllowedUser(JsonObject data) {

@@ -1,5 +1,7 @@
 package be.howest.ti.mars.logic.domain;
 
+import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
+import be.howest.ti.mars.logic.exceptions.RepositoryException;
 import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonObject;
 
@@ -10,8 +12,8 @@ import java.util.logging.Logger;
 
 public class EventHandler {
     private static final EventHandler INSTANCE = new EventHandler();
-    private final Map<String, MessageHandler> messageHandlers = new HashMap<>();
     private static final Logger LOGGER = Logger.getLogger(EventHandler.class.getName());
+    private final Map<String, MessageHandler> messageHandlers = new HashMap<>();
 
     private EventHandler() {
     }
@@ -53,7 +55,12 @@ public class EventHandler {
             data.remove("requestIdentifier");
         }
 
-        SocketResponse response = handler.apply(data);
+        SocketResponse response;
+        try {
+            response = handler.apply(data);
+        } catch (RepositoryException e) {
+            response = new ErrorEventResponse(e.getMessage());
+        }
 
         if (requestIdentifier != null) {
             response.setRequestIdentifier(requestIdentifier);
