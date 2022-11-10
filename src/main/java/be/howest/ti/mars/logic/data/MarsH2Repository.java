@@ -15,7 +15,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 enum Queries {
-    SQL_ADD_PROPERTY("INSERT INTO properties (location,  tier, x, y, status, description) VALUES (?, ?, ?, ?, ?, ?);"), SQL_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ?;"), SQL_GET_PROPERTY("SELECT * FROM properties WHERE id = ?;"), SQL_GET_PROPERTY_ALLOWED_USERS("SELECT * FROM users WHERE id IN (SELECT user_id FROM property_whitelists WHERE property_id = ?)"), SQL_ADD_PROPERTY_WHITELIST("INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"), SQL_REMOVE_PROPERTY_WHITELIST("DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"), SQL_CHANGE_PROPERTY_STATUS("UPDATE properties SET status = ? WHERE id = ?;"), SQL_ADD_AUTH_ENTRY("INSERT INTO authorizations (property_id, user_id) VALUES (?, ?);"), SQL_GET_AUTH_ENTRIES("SELECT * FROM authorizations WHERE property_id = ?"), SQL_GET_PENDING_PROPERTIES("SELECT * FROM properties WHERE status = 'PENDING';"), SQL_BIND_PROPERTY_TO_USER("INSERT INTO user_properties (user_id, property_id) VALUES (?, ?);"), SQL_CHANGE_PROPERTY_SIZE("UPDATE properties SET width = ?, height = ? WHERE id = ?;"),
+    SQL_ADD_PROPERTY("INSERT INTO properties (location,  tier, x, y, status, description) VALUES (?, ?, ?, ?, ?, ?);"),
+    SQL_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ?;"),
+    SQL_GET_PROPERTY("SELECT * FROM properties WHERE id = ?;"),
+    SQL_GET_PROPERTY_ALLOWED_USERS("SELECT * FROM users WHERE id IN (SELECT user_id FROM property_whitelists WHERE property_id = ?)"),
+    SQL_ADD_PROPERTY_WHITELIST("INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"),
+    SQL_REMOVE_PROPERTY_WHITELIST("DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"),
+    SQL_CHANGE_PROPERTY_STATUS("UPDATE properties SET status = ? WHERE id = ?;"),
+    SQL_ADD_AUTH_ENTRY("INSERT INTO authorizations (property_id, user_id) VALUES (?, ?);"),
+    SQL_GET_AUTH_ENTRIES("SELECT * FROM authorizations WHERE property_id = ?"),
+    SQL_GET_PENDING_PROPERTIES("SELECT * FROM properties WHERE status = 'PENDING';"),
+    SQL_BIND_PROPERTY_TO_USER("INSERT INTO user_properties (user_id, property_id) VALUES (?, ?);"),
+    SQL_CHANGE_PROPERTY_SIZE("UPDATE properties SET width = ?, height = ? WHERE id = ?;"),
+    SQL_GET_ALERTS("SELECT * FROM alerts WHERE property_id = ?;"),
+    SQL_ADD_ALERT("INSERT INTO alerts (property_id, user_id) VALUES (?, ?);"),
     ;
 
     private final String query;
@@ -151,15 +164,12 @@ public class MarsH2Repository {
         }
     }
 
-    public void removeProperty(int location) {
+    public boolean removeProperty(int location) {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_PROPERTY.getQuery())) {
             stmt.setInt(1, location);
 
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new RepositoryException("No property found with location: " + location);
-            }
+            stmt.executeUpdate();
+            return true;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not remove property", ex);
             throw new RepositoryException("Could not remove property");
@@ -263,7 +273,16 @@ public class MarsH2Repository {
             result.put("pendingProperties", new JsonArray());
 
             while (rs.next()) {
-                result.getJsonArray("pendingProperties").add(new JsonObject().put("id", rs.getInt("id")).put("location", rs.getString("location")).put("description", rs.getString("description")).put("tier", rs.getInt("tier")).put("x", rs.getInt("x")).put("y", rs.getInt("y")).put("width", rs.getInt("width")).put("height", rs.getInt("height")));
+                result.getJsonArray("pendingProperties").add(
+                        new JsonObject()
+                                .put("id", rs.getInt("id"))
+                                .put("location", rs.getString("location"))
+                                .put("description", rs.getString("description"))
+                                .put("tier", rs.getInt("tier"))
+                                .put("x", rs.getInt("x"))
+                                .put("y", rs.getInt("y"))
+                                .put("width", rs.getInt("width"))
+                                .put("height", rs.getInt("height")));
             }
             return result;
         } catch (SQLException ex) {
@@ -283,6 +302,41 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not change property size.", ex);
             throw new RepositoryException("Could not change property size.");
+        }
+    }
+
+    public JsonObject getAlerts(String propertyId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_ALERTS.getQuery())) {
+            stmt.setString(1, propertyId);
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray alerts = new JsonArray();
+
+            while (rs.next()) {
+                JsonObject alert = new JsonObject();
+                alert.put("id", rs.getInt("id"));
+                alert.put("userId", rs.getString("user_id"));
+                alert.put("timestamp", rs.getString("timestamp"));
+                alerts.add(alert);
+            }
+
+            result.put("alerts", alerts);
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get alerts.", ex);
+            throw new RepositoryException("Could not get alerts.");
+        }
+    }
+
+    public boolean addAlert(String propertyId, String user) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_ALERT.getQuery())) {
+            stmt.setString(1, propertyId);
+            stmt.setString(2, user);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not add alert.", ex);
+            throw new RepositoryException("Could not add alert.");
         }
     }
 }
