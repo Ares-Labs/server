@@ -151,16 +151,36 @@ public class Properties {
         String description = Utils.getOrThrowString(data, "description");
 
         int id = repo.addEquipmentProperty(propertyId, equipmentType, description);
+        Subscriptions.emit(
+                "events.property-equipment-change",
+                new JsonObject()
+                        .put("propertyId", propertyId)
+                        .put("equipmentId", id)
+                        .put("equipmentType", equipmentType)
+                        .put("description", description)
+        );
 
         return new DataEventResponse("add-equipment", new JsonObject().put("id", id));
     }
 
     /// Should emit `events.property-equipment-change`
     public static SocketResponse removeEquipmentProperty(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        int equipmentId = Utils.getOrThrowInt(data, "equipmentId");
+
+        repo.removeEquipmentProperty(propertyId, equipmentId);
+        Subscriptions.emit(
+                "events.property-equipment-change",
+                new JsonObject()
+                        .put("propertyId", propertyId)
+                        .put("equipmentId", equipmentId)
+        );
+
+        return new SuccessEventResponse("remove-equipment");
     }
 
     public static SocketResponse getEquipmentProperty(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        return new DataEventResponse("get-equipment", repo.getEquipmentProperty(propertyId));
     }
 }

@@ -34,6 +34,8 @@ enum Queries {
     SQL_GET_SCANNED_VISITORS("SELECT dayofweek(timestamp) AS day, count(*) AS count from scans where timestamp > ? AND timestamp < ? and property_id = ? GROUP BY day"),
     SQL_ADD_VISITOR("INSERT INTO scans (user_id, property_id, camera_id) VALUES (?, ?, ?);"),
     SQL_ADD_EQUIPMENT_PROPERTY("INSERT INTO installed_equipment (type, property_id, description) VALUES (?, ?, ?);"),
+    SQL_GET_EQUIPMENT_PROPERTY("SELECT * FROM installed_equipment WHERE property_id = ?;"),
+    SQL_REMOVE_EQUIPMENT_PROPERTY("DELETE FROM installed_equipment WHERE property_id = ? AND id = ?;"),
     ;
 
     private final String query;
@@ -418,6 +420,41 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not add equipment property.", ex);
             throw new RepositoryException("Could not add equipment property.");
+        }
+    }
+
+    public JsonObject getEquipmentProperty(int propertyId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_EQUIPMENT_PROPERTY.getQuery())) {
+            stmt.setInt(1, propertyId);
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray equipment = new JsonArray();
+
+            while (rs.next()) {
+                JsonObject equipmentProperty = new JsonObject();
+                equipmentProperty.put("id", rs.getInt("id"));
+                equipmentProperty.put("type", rs.getInt("type"));
+                equipmentProperty.put("description", rs.getString("description"));
+                equipment.add(equipmentProperty);
+            }
+
+            result.put("equipment", equipment);
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get equipment property.", ex);
+            throw new RepositoryException("Could not get equipment property.");
+        }
+    }
+
+    public void removeEquipmentProperty(int propertyId, int equipmentId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_EQUIPMENT_PROPERTY.getQuery())) {
+            stmt.setInt(1, propertyId);
+            stmt.setInt(2, equipmentId);
+
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not remove equipment property.", ex);
+            throw new RepositoryException("Could not remove equipment property.");
         }
     }
 }
