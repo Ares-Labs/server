@@ -11,7 +11,8 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class Response {
 
-    private Response() { }
+    private Response() {
+    }
 
 //    public static void sendQuote(RoutingContext ctx, Quote quote) {
 //        sendOkJsonResponse(ctx, JsonObject.mapFrom(quote));

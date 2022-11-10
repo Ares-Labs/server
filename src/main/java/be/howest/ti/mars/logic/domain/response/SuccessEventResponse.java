@@ -6,6 +6,7 @@ public class SuccessEventResponse extends EventResponse {
     public SuccessEventResponse(String event) {
         this(event, true);
     }
+
     public SuccessEventResponse(String type, boolean success) {
         super(type, makeSuccessResponse(success));
     }

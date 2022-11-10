@@ -36,6 +36,7 @@ enum Queries {
     SQL_ADD_EQUIPMENT_PROPERTY("INSERT INTO installed_equipment (type, property_id, description) VALUES (?, ?, ?);"),
     SQL_GET_EQUIPMENT_PROPERTY("SELECT * FROM installed_equipment WHERE property_id = ?;"),
     SQL_REMOVE_EQUIPMENT_PROPERTY("DELETE FROM installed_equipment WHERE property_id = ? AND id = ?;"),
+    SQL_GET_EQUIPMENT_TYPES("SELECT * FROM equipment_types;"),
     ;
 
     private final String query;
@@ -455,6 +456,27 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not remove equipment property.", ex);
             throw new RepositoryException("Could not remove equipment property.");
+        }
+    }
+
+    public JsonObject getEquipmentTypes() {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_EQUIPMENT_TYPES.getQuery())) {
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray equipmentTypes = new JsonArray();
+
+            while (rs.next()) {
+                JsonObject equipmentType = new JsonObject();
+                equipmentType.put("type", rs.getInt("type"));
+                equipmentType.put("name", rs.getString("name"));
+                equipmentTypes.add(equipmentType);
+            }
+
+            result.put("equipmentTypes", equipmentTypes);
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get equipment types.", ex);
+            throw new RepositoryException("Could not get equipment types.");
         }
     }
 }

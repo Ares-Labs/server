@@ -7,7 +7,10 @@ import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Subscriptions {
     private static final Map<String, Set<String>> associations = new HashMap<>();

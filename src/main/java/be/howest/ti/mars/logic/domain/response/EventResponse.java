@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class EventResponse extends BasicMessage {
     private final String type;
-    private String channel;
     private final Map<String, Object> data;
+    private String channel;
 
     public EventResponse(String type, Map<String, Object> data) {
         this(type, data, null);

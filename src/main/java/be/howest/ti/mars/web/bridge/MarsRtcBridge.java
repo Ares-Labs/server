@@ -37,6 +37,10 @@ public class MarsRtcBridge {
     private SockJSHandler sockJSHandler;
     private EventBus eb;
 
+    public static String formatAddress(String address, String id) {
+        return String.format("%s.%s", address, id);
+    }
+
     private void createSockJSHandler() {
         final PermittedOptions permittedOptions = new PermittedOptions().setAddressRegex("events\\..+");
         final SockJSBridgeOptions options = new SockJSBridgeOptions()
@@ -66,10 +70,6 @@ public class MarsRtcBridge {
         handleConsumerMessage(OUTBOUND, msg);
     }
 
-    public static String formatAddress(String address, String id) {
-        return String.format("%s.%s", address, id);
-    }
-
     public SockJSHandler getSockJSHandler(Vertx vertx) {
         sockJSHandler = SockJSHandler.create(vertx);
         eb = vertx.eventBus();
@@ -84,7 +84,7 @@ public class MarsRtcBridge {
         eh.addEventHandler("subscribe", Subscriptions::subscribe);
 
         eh.addEventHandler("queries.get-user", Users::getUser);
-        eh.addEventHandler("get-equipment-types", Equipment::getTypes);
+        eh.addEventHandler("queries.get-equipment-types", Equipment::getTypes);
 
         eh.addEventHandler("queries.add-property", Properties::addProperty);
         eh.addEventHandler("queries.remove-property", Properties::removeProperty);
@@ -100,8 +100,8 @@ public class MarsRtcBridge {
         eh.addEventHandler("queries.add-allowed-user", Properties::addAllowedUser);
         eh.addEventHandler("queries.remove-allowed-user", Properties::removeAllowedUser);
 
-        eh.addEventHandler("queries.get-alerts",  Properties::getAlerts);
-        eh.addEventHandler("queries.add-alert",  Properties::addAlert);
+        eh.addEventHandler("queries.get-alerts", Properties::getAlerts);
+        eh.addEventHandler("queries.add-alert", Properties::addAlert);
 
         eh.addEventHandler("queries.get-weekly-visitors", Properties::getWeeklyVisitors);
         eh.addEventHandler("queries.add-visitor", Properties::addVisitor);
