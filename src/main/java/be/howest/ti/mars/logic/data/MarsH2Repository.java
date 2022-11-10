@@ -15,15 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 enum Queries {
-    SQL_ADD_PROPERTY("INSERT INTO properties (location,  tier, x, y, width, height, status, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"),
-    SQL_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ?;"),
-    SQL_GET_PROPERTY("SELECT * FROM properties WHERE id = ?;"),
-    SQL_GET_PROPERTY_ALLOWED_USERS("SELECT * FROM users WHERE id IN (SELECT user_id FROM property_whitelists WHERE property_id = ?)"),
-    SQL_ADD_PROPERTY_WHITELIST("INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"),
-    SQL_REMOVE_PROPERTY_WHITELIST("DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"),
-    SQL_CHANGE_PROPERTY_STATUS("UPDATE properties SET status = ? WHERE id = ?;"),
-    SQL_ADD_AUTH_ENTRY("INSERT INTO authorizations (property_id, user_id) VALUES (?, ?);"),
-    SQL_GET_AUTH_ENTRIES("SELECT * FROM authorizations WHERE property_id = ?"),
+    SQL_ADD_PROPERTY("INSERT INTO properties (location,  tier, x, y, status, description) VALUES (?, ?, ?, ?, ?, ?);"), SQL_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ?;"), SQL_GET_PROPERTY("SELECT * FROM properties WHERE id = ?;"), SQL_GET_PROPERTY_ALLOWED_USERS("SELECT * FROM users WHERE id IN (SELECT user_id FROM property_whitelists WHERE property_id = ?)"), SQL_ADD_PROPERTY_WHITELIST("INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"), SQL_REMOVE_PROPERTY_WHITELIST("DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"), SQL_CHANGE_PROPERTY_STATUS("UPDATE properties SET status = ? WHERE id = ?;"), SQL_ADD_AUTH_ENTRY("INSERT INTO authorizations (property_id, user_id) VALUES (?, ?);"), SQL_GET_AUTH_ENTRIES("SELECT * FROM authorizations WHERE property_id = ?"), SQL_GET_PENDING_PROPERTIES("SELECT * FROM properties WHERE status = 'PENDING';"), SQL_BIND_PROPERTY_TO_USER("INSERT INTO user_properties (user_id, property_id) VALUES (?, ?);"), SQL_CHANGE_PROPERTY_SIZE("UPDATE properties SET width = ?, height = ? WHERE id = ?;"),
     ;
 
     private final String query;
@@ -60,66 +52,6 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "DB configuration failed", ex);
             throw new RepositoryException("Could not configure MarsH2repository");
-        }
-    }
-
-    public void insertProperty(String clientId, String location, int tier, int x, int y, int width, int height, String status, String description) {
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_PROPERTY.getQuery(), Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, location);
-            stmt.setInt(2, tier);
-            stmt.setInt(3, x);
-            stmt.setInt(4, y);
-            stmt.setInt(5, width);
-            stmt.setInt(6, height);
-            stmt.setString(7, status);
-            stmt.setString(8, description);
-
-            stmt.executeUpdate();
-
-            int returnedId = stmt.getGeneratedKeys().getInt(1);
-
-            // Add property to users properties
-            try (PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO user_properties (user_id, property_id) VALUES (?, ?);")) {
-                stmt2.setString(1, clientId);
-                stmt2.setInt(2, returnedId);
-                stmt2.executeUpdate();
-            }
-
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Could not insert property", ex);
-            throw new RepositoryException("Could not insert property");
-        }
-    }
-
-    public JsonObject getProperty(int locationId) {
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PROPERTY.getQuery())) {
-            stmt.setInt(1, locationId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new JsonObject().put("id", rs.getInt("id")).put("location", rs.getString("location")).put("description", rs.getString("description")).put("tier", rs.getInt("tier")).put("x", rs.getInt("x")).put("y", rs.getInt("y")).put("width", rs.getInt("width")).put("height", rs.getInt("height"));
-                } else {
-                    return null;
-                }
-            }
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Could not get property", ex);
-            throw new RepositoryException("Could not get property");
-        }
-    }
-
-    public void removeProperty(int location) {
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_PROPERTY.getQuery())) {
-            stmt.setInt(1, location);
-
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows == 0) {
-                throw new RepositoryException("No property found with location: " + location);
-            }
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Could not remove property", ex);
-            throw new RepositoryException("Could not remove property");
         }
     }
 
@@ -160,6 +92,78 @@ public class MarsH2Repository {
 
     public Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url, username, password);
+    }
+
+
+    public void insertProperty(String clientId, String location, int tier, int x, int y, String status, String description) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_PROPERTY.getQuery(), Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, location);
+            stmt.setInt(2, tier);
+            stmt.setInt(3, x);
+            stmt.setInt(4, y);
+            stmt.setString(5, status);
+            stmt.setString(6, description);
+
+            stmt.executeUpdate();
+
+            stmt.getGeneratedKeys().next();
+            int returnedId = stmt.getGeneratedKeys().getInt(1);
+
+            // Add property to users properties
+            try (PreparedStatement stmt2 = conn.prepareStatement(Queries.SQL_BIND_PROPERTY_TO_USER.getQuery())) {
+                stmt2.setString(1, clientId);
+                stmt2.setInt(2, returnedId);
+                stmt2.executeUpdate();
+            }
+
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not insert property", ex);
+            throw new RepositoryException("Could not insert property");
+        }
+    }
+
+    public JsonObject getProperty(int locationId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PROPERTY.getQuery())) {
+            stmt.setInt(1, locationId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    JsonObject property = new JsonObject();
+                    property.put("id", rs.getInt("id"));
+                    property.put("location", rs.getString("location"));
+                    property.put("tier", rs.getInt("tier"));
+                    property.put("x", rs.getInt("x"));
+                    property.put("y", rs.getInt("y"));
+                    property.put("width", rs.getInt("width"));
+                    property.put("height", rs.getInt("height"));
+                    property.put("status", rs.getString("status"));
+                    property.put("description", rs.getString("description"));
+
+
+                    return property;
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get property", ex);
+            throw new RepositoryException("Could not get property");
+        }
+    }
+
+    public void removeProperty(int location) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_PROPERTY.getQuery())) {
+            stmt.setInt(1, location);
+
+            int affectedRows = stmt.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new RepositoryException("No property found with location: " + location);
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not remove property", ex);
+            throw new RepositoryException("Could not remove property");
+        }
     }
 
     public JsonObject getAllowedUsers(String propertyId) {
@@ -248,6 +252,37 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not get auth entries.", ex);
             throw new RepositoryException("Could not get auth entries.");
+        }
+    }
+
+    public JsonObject getPendingProperties() {
+        // Get all pending properties
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PENDING_PROPERTIES.getQuery())) {
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            result.put("pendingProperties", new JsonArray());
+
+            while (rs.next()) {
+                result.getJsonArray("pendingProperties").add(new JsonObject().put("id", rs.getInt("id")).put("location", rs.getString("location")).put("description", rs.getString("description")).put("tier", rs.getInt("tier")).put("x", rs.getInt("x")).put("y", rs.getInt("y")).put("width", rs.getInt("width")).put("height", rs.getInt("height")));
+            }
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get pending properties.", ex);
+            throw new RepositoryException("Could not get pending properties.");
+        }
+    }
+
+    public boolean changePropertySize(int id, int width, int height) {
+        // Change the size of a property
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_CHANGE_PROPERTY_SIZE.getQuery())) {
+            stmt.setInt(1, width);
+            stmt.setInt(2, height);
+            stmt.setInt(3, id);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not change property size.", ex);
+            throw new RepositoryException("Could not change property size.");
         }
     }
 }

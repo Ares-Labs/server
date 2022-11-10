@@ -7,7 +7,6 @@ import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import be.howest.ti.mars.logic.domain.response.SuccessEventResponse;
-import be.howest.ti.mars.logic.exceptions.RepositoryException;
 import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonObject;
 
@@ -22,13 +21,11 @@ public class Properties {
         int tier = Utils.getOrThrowInt(data, "tier");
         int x = Utils.getOrThrowInt(data, "x");
         int y = Utils.getOrThrowInt(data, "y");
-        int width = Utils.getOrThrowInt(data, "width");
-        int height = Utils.getOrThrowInt(data, "height");
         String description = Utils.getOrThrowString(data, "description");
         String clientId = Utils.getOrThrowString(data, "clientId");
         String status = "PENDING";
 
-        repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
+        repo.insertProperty(clientId, location, tier, x, y, status, description);
         return new StatusMessageEventResponse("Property added");
     }
 
@@ -50,8 +47,17 @@ public class Properties {
         return new SuccessEventResponse("change-property-status", success);
     }
 
+    public static SocketResponse changePropertySize(JsonObject data) {
+        int id = Utils.getOrThrowInt(data, "id");
+        int width = Utils.getOrThrowInt(data, "width");
+        int height = Utils.getOrThrowInt(data, "height");
+
+        boolean success = repo.changePropertySize(id, width, height);
+        return new SuccessEventResponse("change-property-size", success);
+    }
+
     public static SocketResponse getPendingProperties(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        return new DataEventResponse("get-pending-properties", repo.getPendingProperties());
     }
 
     public static SocketResponse getAllowedUsers(JsonObject data) {
