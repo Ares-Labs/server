@@ -29,7 +29,7 @@ enum Queries {
     SQL_CHANGE_PROPERTY_SIZE("UPDATE properties SET width = ?, height = ? WHERE id = ?;"),
     SQL_GET_ALERTS("SELECT * FROM alerts WHERE property_id = ?;"),
     SQL_ADD_ALERT("INSERT INTO alerts (property_id, user_id) VALUES (?, ?);"),
-    ;
+    SQL_GET_SCANNED_VISITORS("SELECT dayofweek(timestamp) AS day, count(*) AS count from scans where timestamp > ? AND timestamp < ? and property_id = ? GROUP BY day");
 
     private final String query;
 
@@ -337,6 +337,32 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not add alert.", ex);
             throw new RepositoryException("Could not add alert.");
+        }
+    }
+
+
+    public JsonObject getScannedVisitors(String propertyId, String from, String to) {
+        // Get scanned visitors for a property between two dates
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_SCANNED_VISITORS.getQuery())) {
+            stmt.setString(1, propertyId);
+            stmt.setString(2, from);
+            stmt.setString(3, to);
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray visitors = new JsonArray();
+
+            while (rs.next()) {
+                JsonObject visitor = new JsonObject();
+                visitor.put("day", rs.getString("day"));
+                visitor.put("count", rs.getInt("count"));
+                visitors.add(visitor);
+            }
+
+            result.put("visitors", visitors);
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get scanned visitors.", ex);
+            throw new RepositoryException("Could not get scanned visitors.");
         }
     }
 }

@@ -116,7 +116,11 @@ public class Properties {
     }
 
     public static SocketResponse getScannedVisitors(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        // Get scans for specific property
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        String from = Utils.getOrThrowString(data, "from");
+        String to = Utils.getOrThrowString(data, "to");
+        return new DataEventResponse("get-scanned-visitors", repo.getScannedVisitors(propertyId, from, to));
     }
 
     /// Should emit `events.scanned`
