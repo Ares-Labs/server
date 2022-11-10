@@ -10,7 +10,7 @@ public abstract class BasicMessage implements SocketResponse {
         throw new NotImplementedException("getType method not implemented");
     }
 
-    public Map<String, String> getJsonData() {
+    public Map<String, Object> getJsonData() {
         throw new NotImplementedException("getJsonData method not implemented");
     }
 

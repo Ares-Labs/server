@@ -80,7 +80,7 @@ public class MarsRtcBridge {
         eh.addEventHandler("queries.add-property", Properties::addProperty);
         eh.addEventHandler("queries.remove-property", Properties::removeProperty);
         eh.addEventHandler("queries.get-property", Properties::getProperty);
-        eh.addEventHandler("queries.getAllowedUsers", Properties::getAllowedUsers);
+        eh.addEventHandler("queries.get-allowed-users", Properties::getAllowedUsers);
 
         return sockJSHandler;
     }
