@@ -37,6 +37,7 @@ public class Properties {
     }
 
     public static SocketResponse getProperty(JsonObject data) {
+        Subscriptions.emit("events.alerts", new JsonObject().put("message", "Got a property"));
         return new ErrorEventResponse("Not implemented yet");
     }
 

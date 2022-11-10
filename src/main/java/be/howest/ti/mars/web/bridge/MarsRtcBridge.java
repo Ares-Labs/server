@@ -2,6 +2,7 @@ package be.howest.ti.mars.web.bridge;
 
 import be.howest.ti.mars.logic.domain.EventHandler;
 import be.howest.ti.mars.logic.domain.events.Properties;
+import be.howest.ti.mars.logic.domain.events.Subscriptions;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import io.vertx.core.Vertx;
@@ -28,8 +29,8 @@ import java.util.logging.Logger;
  * Just like in the openapi bridge, keep business logic isolated in the package logic.
  */
 public class MarsRtcBridge {
-    private static final String OUTBOUND = "events.to.martians";
-    private static final String INBOUND = "events.from.martians";
+    public static final String OUTBOUND = "events.to.martians";
+    public static final String INBOUND = "events.from.martians";
     private static final Logger LOGGER = Logger.getLogger(MarsRtcBridge.class.getName());
     private SockJSHandler sockJSHandler;
     private EventBus eb;
@@ -63,13 +64,14 @@ public class MarsRtcBridge {
         handleConsumerMessage(OUTBOUND, msg);
     }
 
-    private String formatAddress(String address, String id) {
+    public static String formatAddress(String address, String id) {
         return String.format("%s.%s", address, id);
     }
 
     public SockJSHandler getSockJSHandler(Vertx vertx) {
         sockJSHandler = SockJSHandler.create(vertx);
         eb = vertx.eventBus();
+        Subscriptions.setBus(eb);
         createSockJSHandler();
 
         eb.consumer(INBOUND, this::handlePublicConsumerMessage);
@@ -77,6 +79,8 @@ public class MarsRtcBridge {
         EventHandler eh = EventHandler.getInstance();
 
         eh.addEventHandler("session", this::addNewSession);
+        eh.addEventHandler("subscribe", Subscriptions::subscribe);
+
         eh.addEventHandler("queries.add-property", Properties::addProperty);
         eh.addEventHandler("queries.remove-property", Properties::removeProperty);
         eh.addEventHandler("queries.get-property", Properties::getProperty);
