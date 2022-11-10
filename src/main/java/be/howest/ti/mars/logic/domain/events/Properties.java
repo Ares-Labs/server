@@ -39,7 +39,7 @@ public class Properties {
             MarsH2Repository repo = Repositories.getH2Repo();
 
             String propertyId = Utils.getOrThrowString(data, "propertyId");
-            return new DataEventResponse("getAllowedUsers", repo.getAllowedUsers(propertyId));
+            return new DataEventResponse("get-allowed-users", repo.getAllowedUsers(propertyId));
         } catch (RepositoryException ex) {
             return new ErrorEventResponse(ex.getMessage());
         }
