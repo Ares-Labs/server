@@ -50,6 +50,10 @@ public class Properties {
         return new SuccessEventResponse("change-property-status", success);
     }
 
+    public static SocketResponse getPendingProperties(JsonObject data) {
+        return new ErrorEventResponse("Not implemented");
+    }
+
     public static SocketResponse getAllowedUsers(JsonObject data) {
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         return new DataEventResponse("get-allowed-users", repo.getAllowedUsers(propertyId));

@@ -85,6 +85,7 @@ public class MarsRtcBridge {
         eh.addEventHandler("queries.remove-property", Properties::removeProperty);
         eh.addEventHandler("queries.get-property", Properties::getProperty);
         eh.addEventHandler("queries.change-property-status", Properties::changePropertyStatus);
+        eh.addEventHandler("queries.get-pending-properties", Properties::getPendingProperties);
 
         eh.addEventHandler("queries.get-allowed-users", Properties::getAllowedUsers);
         eh.addEventHandler("queries.add-allowed-user", Properties::addAllowedUser);
