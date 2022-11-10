@@ -1,6 +1,7 @@
 package be.howest.ti.mars.logic.data;
 
 import be.howest.ti.mars.logic.exceptions.RepositoryException;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.h2.tools.Server;
 
@@ -22,6 +23,7 @@ enum Queries {
     SQL_REMOVE_PROPERTY_WHITELIST("DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"),
     SQL_CHANGE_PROPERTY_STATUS("UPDATE properties SET status = ? WHERE id = ?;"),
     SQL_ADD_AUTH_ENTRY("INSERT INTO authorizations (property_id, user_id) VALUES (?, ?);"),
+    SQL_GET_AUTH_ENTRIES("SELECT * FROM authorizations WHERE property_id = ?"),
     ;
 
     private final String query;
@@ -227,6 +229,25 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not add auth entry.", ex);
             throw new RepositoryException("Could not add auth entry.");
+        }
+    }
+
+    public JsonObject getAuthEntries(String propertyId) {
+        // Get all auth entries for a property
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_AUTH_ENTRIES.getQuery())) {
+            stmt.setString(1, propertyId);
+            ResultSet rs = stmt.executeQuery();
+            JsonArray result = new JsonArray();
+            while (rs.next()) {
+                JsonObject entry = new JsonObject();
+                entry.put("user_id", rs.getString("user_id"));
+                entry.put("timestamp", rs.getString("timestamp"));
+                result.add(entry);
+            }
+            return new JsonObject().put("authEntries", result);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get auth entries.", ex);
+            throw new RepositoryException("Could not get auth entries.");
         }
     }
 }

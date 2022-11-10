@@ -111,7 +111,9 @@ public class Properties {
     }
 
     public static SocketResponse getAuthEntries(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        // Get entries of authorizations for specific property
+        String propertyId = Utils.getOrThrowString(data, "propertyId");
+        return new DataEventResponse("get-auth-entries", repo.getAuthEntries(propertyId));
     }
 
     /// Should emit `events.auth-entries`
