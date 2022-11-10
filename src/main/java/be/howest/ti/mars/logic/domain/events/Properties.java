@@ -6,6 +6,7 @@ import be.howest.ti.mars.logic.domain.Utils;
 import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
+import be.howest.ti.mars.logic.domain.response.SuccessEventResponse;
 import be.howest.ti.mars.logic.exceptions.RepositoryException;
 import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonObject;
@@ -45,7 +46,11 @@ public class Properties {
     }
 
     public static SocketResponse changePropertyStatus(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        int id = Utils.getOrThrowInt(data, "id");
+        String status = Utils.getOrThrowString(data, "status");
+        boolean success = repo.changePropertyStatus(id, status);
+
+        return new SuccessEventResponse("change-property-status", success);
     }
 
     public static SocketResponse getAllowedUsers(JsonObject data) {
@@ -57,7 +62,7 @@ public class Properties {
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
         boolean success = repo.addAllowedUser(propertyId, userId);
-        return new DataEventResponse("add-allowed-user", new JsonObject().put("success", success));
+        return new SuccessEventResponse("add-allowed-user", success);
     }
 
     public static SocketResponse removeAllowedUser(JsonObject data) {
@@ -66,7 +71,7 @@ public class Properties {
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
         boolean success = repo.removeAllowedUser(propertyId, userId);
-        return new DataEventResponse("remove-allowed-user", new JsonObject().put("success", success));
+        return new SuccessEventResponse("remove-allowed-user", success);
     }
 
     public static SocketResponse getAlerts(JsonObject data) {

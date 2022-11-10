@@ -13,95 +13,33 @@ import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/* All queries:
--- Initial user registry
-INSERT INTO users (id, full_name)
-VALUES (?, ?);
+enum Queries {
+    SQL_ADD_PROPERTY("INSERT INTO properties (location,  tier, x, y, width, height, status, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"),
+    SQL_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ?;"),
+    SQL_GET_PROPERTY("SELECT * FROM properties WHERE id = ?;"),
+    SQL_GET_PROPERTY_ALLOWED_USERS("SELECT * FROM users WHERE id IN (SELECT user_id FROM property_whitelists WHERE property_id = ?)"),
+    SQL_ADD_PROPERTY_WHITELIST("INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"),
+    SQL_REMOVE_PROPERTY_WHITELIST("DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"),
+    SQL_CHANGE_PROPERTY_STATUS("UPDATE properties SET status = ? WHERE id = ?;"),
+    ;
 
--- Add a property
-INSERT INTO properties (location, tier, x, y, width, height)
-VALUES (?, ?, ?, ?, ?, ?);
+    private final String query;
 
--- Assign a property to a user
-INSERT INTO user_properties (user_id, property_location)
-VALUES (?, ?);
+    Queries(String query) {
+        this.query = query;
+    }
 
--- Add user to white list
-INSERT INTO property_whitelists (user_id, property_location)
-VALUES (?, ?);
+    public String getQuery() {
+        return query;
+    }
 
--- Add equipment to a property
-INSERT INTO installed_equipment (description, property_location, type)
-VALUES (?, ?, ?);
-
--- Add an alert (this includes authorized users)
-INSERT INTO alerts (user_id, property_location)
-VALUES (?, ?);
-
--- Select a user's properties
-SELECT *
-FROM properties
-WHERE location IN (SELECT property_location
-                   FROM user_properties
-                   WHERE user_id = ?);
-
--- Select whitelisted users of a property
-SELECT *
-FROM users
-WHERE id IN (SELECT user_id
-             FROM property_whitelists
-             WHERE property_location = ?);
-
--- Select alerts from a user
-SELECT *
-FROM alerts
-WHERE user_id = ?
-ORDER BY timestamp DESC
-LIMIT ?;
-
--- Select alerts and trespass from a property
-SELECT a.id, a.timestamp, u.id, u.full_name
-FROM alerts AS a
-         JOIN users u ON a.user_id = u.id
-WHERE property_location = ?
-ORDER BY a.timestamp DESC
-LIMIT ?;
-
--- Select alerts from users that are not whitelisted on a property
-SELECT a.id, a.timestamp, u.id, u.full_name
-FROM alerts AS a
-         JOIN users u ON a.user_id = u.id
-WHERE property_location = ?
-  AND u.id NOT IN (SELECT w.user_id FROM property_whitelists AS w WHERE w.property_location = ?)
-  AND u.id NOT IN (SELECT m.user_id FROM user_properties AS m WHERE m.property_location = ?)
-ORDER BY a.timestamp DESC
-LIMIT ?;
-
--- Get protected areas that you currently reside in
-SELECT location, tier
-FROM properties
-WHERE x < ?
-  AND x + width > ?
-  AND y > ?
-  AND y + height > ?;
-
--- Get all property locations
-SELECT x, y, width, height
-FROM properties;
- */
-
-/*
-This is only a starter class to use an H2 database.
-In this start project there was no need for a Java interface MarsRepository.
-Please always use interfaces when needed.
-
-To make this class useful, please complete it with the topics seen in the module OOA & SD
- */
+    @Override
+    public String toString() {
+        return query;
+    }
+}
 
 public class MarsH2Repository {
-    public static final String SQL_ADD_PROPERTY = "INSERT INTO properties (location,  tier, x, y, width, height, status, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
-    public static final String SQL_REMOVE_PROPERTY = "DELETE FROM properties WHERE id = ?;";
-    public static final String SQL_GET_PROPERTY = "SELECT * FROM properties WHERE id = ?;";
     private static final Logger LOGGER = Logger.getLogger(MarsH2Repository.class.getName());
     private final Server dbWebConsole;
     private final String username;
@@ -113,9 +51,7 @@ public class MarsH2Repository {
             this.username = username;
             this.password = password;
             this.url = url;
-            this.dbWebConsole = Server.createWebServer(
-                    "-ifNotExists",
-                    "-webPort", String.valueOf(console)).start();
+            this.dbWebConsole = Server.createWebServer("-ifNotExists", "-webPort", String.valueOf(console)).start();
             LOGGER.log(Level.INFO, "Database web console started on port: {0}", console);
             this.generateData();
         } catch (SQLException ex) {
@@ -125,8 +61,7 @@ public class MarsH2Repository {
     }
 
     public void insertProperty(String clientId, String location, int tier, int x, int y, int width, int height, String status, String description) {
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SQL_ADD_PROPERTY, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_PROPERTY.getQuery(), Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, location);
             stmt.setInt(2, tier);
             stmt.setInt(3, x);
@@ -154,21 +89,12 @@ public class MarsH2Repository {
     }
 
     public JsonObject getProperty(int locationId) {
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SQL_GET_PROPERTY)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PROPERTY.getQuery())) {
             stmt.setInt(1, locationId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return new JsonObject()
-                            .put("id", rs.getInt("id"))
-                            .put("location", rs.getString("location"))
-                            .put("description", rs.getString("description"))
-                            .put("tier", rs.getInt("tier"))
-                            .put("x", rs.getInt("x"))
-                            .put("y", rs.getInt("y"))
-                            .put("width", rs.getInt("width"))
-                            .put("height", rs.getInt("height"));
+                    return new JsonObject().put("id", rs.getInt("id")).put("location", rs.getString("location")).put("description", rs.getString("description")).put("tier", rs.getInt("tier")).put("x", rs.getInt("x")).put("y", rs.getInt("y")).put("width", rs.getInt("width")).put("height", rs.getInt("height"));
                 } else {
                     return null;
                 }
@@ -180,8 +106,7 @@ public class MarsH2Repository {
     }
 
     public void removeProperty(int location) {
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(SQL_REMOVE_PROPERTY)) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_PROPERTY.getQuery())) {
             stmt.setInt(1, location);
 
             int affectedRows = stmt.executeUpdate();
@@ -196,8 +121,7 @@ public class MarsH2Repository {
     }
 
     public void cleanUp() {
-        if (dbWebConsole != null && dbWebConsole.isRunning(false))
-            dbWebConsole.stop();
+        if (dbWebConsole != null && dbWebConsole.isRunning(false)) dbWebConsole.stop();
 
         try {
             Files.deleteIfExists(Path.of("./db-06.mv.db"));
@@ -219,18 +143,14 @@ public class MarsH2Repository {
 
     private void executeScript(String fileName) throws IOException, SQLException {
         String createDbSql = readFile(fileName);
-        try (
-                Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(createDbSql)
-        ) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(createDbSql)) {
             stmt.executeUpdate();
         }
     }
 
     private String readFile(String fileName) throws IOException {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-        if (inputStream == null)
-            throw new RepositoryException("Could not read file: " + fileName);
+        if (inputStream == null) throw new RepositoryException("Could not read file: " + fileName);
 
         return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
     }
@@ -241,12 +161,7 @@ public class MarsH2Repository {
 
     public JsonObject getAllowedUsers(String propertyId) {
         // Get whitelisted users of a property
-        try (
-                Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(
-                        "SELECT * FROM users WHERE id IN (SELECT user_id FROM property_whitelists WHERE property_id = ?)"
-                )
-        ) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PROPERTY_ALLOWED_USERS.getQuery())) {
             stmt.setString(1, propertyId);
             ResultSet rs = stmt.executeQuery();
             JsonObject result = new JsonObject();
@@ -264,12 +179,7 @@ public class MarsH2Repository {
 
     public boolean addAllowedUser(String propertyId, String userId) {
         // Add a user to the whitelist of a property
-        try (
-                Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(
-                        "INSERT INTO property_whitelists (property_id, user_id) VALUES (?, ?)"
-                )
-        ) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_PROPERTY_WHITELIST.getQuery())) {
             stmt.setString(1, propertyId);
             stmt.setString(2, userId);
             stmt.executeUpdate();
@@ -282,12 +192,7 @@ public class MarsH2Repository {
 
     public boolean removeAllowedUser(String propertyId, String userId) {
         // Remove a user from the whitelist of a property
-        try (
-                Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(
-                        "DELETE FROM property_whitelists WHERE property_id = ? AND user_id = ?"
-                )
-        ) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REMOVE_PROPERTY_WHITELIST.getQuery())) {
             stmt.setString(1, propertyId);
             stmt.setString(2, userId);
             stmt.executeUpdate();
@@ -295,6 +200,19 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not remove allowed user.", ex);
             throw new RepositoryException("Could not remove allowed user.");
+        }
+    }
+
+    public boolean changePropertyStatus(int id, String status) {
+        // Change the status of a property
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_CHANGE_PROPERTY_STATUS.getQuery())) {
+            stmt.setString(1, status);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not change property status.", ex);
+            throw new RepositoryException("Could not change property status.");
         }
     }
 }
