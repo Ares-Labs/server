@@ -7,14 +7,14 @@ import java.util.Map;
 
 public class EventResponse extends BasicMessage {
     private final String type;
+    private final Map<String, Object> data;
     private String channel;
-    private final Map<String, String> data;
 
-    public EventResponse(String type, Map<String, String> data) {
+    public EventResponse(String type, Map<String, Object> data) {
         this(type, data, null);
     }
 
-    public EventResponse(String type, Map<String, String> data, String channel) {
+    public EventResponse(String type, Map<String, Object> data, String channel) {
         this.type = type;
         this.channel = channel;
         this.data = new HashMap<>(data);
@@ -26,7 +26,7 @@ public class EventResponse extends BasicMessage {
     }
 
     @Override
-    public Map<String, String> getJsonData() {
+    public Map<String, Object> getJsonData() {
         return data;
     }
 

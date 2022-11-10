@@ -1,6 +1,10 @@
 package be.howest.ti.mars.web.bridge;
 
 import be.howest.ti.mars.logic.domain.EventHandler;
+import be.howest.ti.mars.logic.domain.events.Equipment;
+import be.howest.ti.mars.logic.domain.events.Properties;
+import be.howest.ti.mars.logic.domain.events.Subscriptions;
+import be.howest.ti.mars.logic.domain.events.Users;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import io.vertx.core.Vertx;
@@ -10,6 +14,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSBridgeOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The RTC bridge is one of the class taught topics.
@@ -24,10 +31,15 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler;
  * Just like in the openapi bridge, keep business logic isolated in the package logic.
  */
 public class MarsRtcBridge {
-    private static final String OUTBOUND = "events.to.martians";
-    private static final String INBOUND = "events.from.martians";
+    public static final String OUTBOUND = "events.to.martians";
+    public static final String INBOUND = "events.from.martians";
+    private static final Logger LOGGER = Logger.getLogger(MarsRtcBridge.class.getName());
     private SockJSHandler sockJSHandler;
     private EventBus eb;
+
+    public static String formatAddress(String address, String id) {
+        return String.format("%s.%s", address, id);
+    }
 
     private void createSockJSHandler() {
         final PermittedOptions permittedOptions = new PermittedOptions().setAddressRegex("events\\..+");
@@ -58,28 +70,62 @@ public class MarsRtcBridge {
         handleConsumerMessage(OUTBOUND, msg);
     }
 
-    private String formatAddress(String address, String id) {
-        return String.format("%s.%s", address, id);
-    }
-
     public SockJSHandler getSockJSHandler(Vertx vertx) {
         sockJSHandler = SockJSHandler.create(vertx);
         eb = vertx.eventBus();
+        Subscriptions.setBus(eb);
         createSockJSHandler();
 
         eb.consumer(INBOUND, this::handlePublicConsumerMessage);
 
-        // Session event bus initialisation
-        EventHandler.getInstance().addEventHandler("session", data -> {
-            String id = data.getString("id");
-            String out = formatAddress(OUTBOUND, id);
-            eb.consumer(formatAddress(INBOUND, id), (Message<String> msg) -> handleConsumerMessage(out, msg));
+        EventHandler eh = EventHandler.getInstance();
 
-            SocketResponse res = new StatusMessageEventResponse("created");
-            res.setChannel(out);
-            return res;
-        });
+        eh.addEventHandler("session", this::addNewSession);
+        eh.addEventHandler("subscribe", Subscriptions::subscribe);
+
+        eh.addEventHandler("queries.get-user", Users::getUser);
+        eh.addEventHandler("queries.get-equipment-types", Equipment::getTypes);
+
+        eh.addEventHandler("queries.add-property", Properties::addProperty);
+        eh.addEventHandler("queries.remove-property", Properties::removeProperty);
+        eh.addEventHandler("queries.get-property", Properties::getProperty);
+        eh.addEventHandler("queries.change-property-size", Properties::changePropertySize);
+        eh.addEventHandler("queries.change-property-status", Properties::changePropertyStatus);
+        eh.addEventHandler("queries.get-pending-properties", Properties::getPendingProperties);
+        eh.addEventHandler("queries.add-equipment-property", Properties::addEquipmentProperty);
+        eh.addEventHandler("queries.remove-equipment-property", Properties::removeEquipmentProperty);
+        eh.addEventHandler("queries.get-equipment-property", Properties::getEquipmentProperty);
+
+        eh.addEventHandler("queries.get-allowed-users", Properties::getAllowedUsers);
+        eh.addEventHandler("queries.add-allowed-user", Properties::addAllowedUser);
+        eh.addEventHandler("queries.remove-allowed-user", Properties::removeAllowedUser);
+
+        eh.addEventHandler("queries.get-alerts", Properties::getAlerts);
+        eh.addEventHandler("queries.add-alert", Properties::addAlert);
+
+        eh.addEventHandler("queries.get-weekly-visitors", Properties::getWeeklyVisitors);
+        eh.addEventHandler("queries.add-visitor", Properties::addVisitor);
+        eh.addEventHandler("queries.get-scanned-visitors", Properties::getScannedVisitors);
+
+        eh.addEventHandler("queries.get-crimes-in-area", Properties::getCrimesInArea);
+        eh.addEventHandler("queries.add-crime", Properties::addCrime);
+
+        eh.addEventHandler("queries.get-auth-entries", Properties::getAuthEntries);
+        eh.addEventHandler("queries.add-auth-entry", Properties::addAuthEntry);
 
         return sockJSHandler;
+    }
+
+    private SocketResponse addNewSession(JsonObject data) {
+        // Session event bus initialisation
+        String id = data.getString("id");
+        String out = formatAddress(OUTBOUND, id);
+        eb.consumer(formatAddress(INBOUND, id), (Message<String> msg) -> handleConsumerMessage(out, msg));
+
+        SocketResponse res = new StatusMessageEventResponse("created");
+        res.setChannel(out);
+
+        LOGGER.log(Level.INFO, "New session created: {0}", id);
+        return res;
     }
 }
