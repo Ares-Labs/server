@@ -135,7 +135,8 @@ public class Properties {
 
     /// Should emit `events.crimes`
     public static SocketResponse addCrime(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        // Some SQL magic here
+        return new SuccessEventResponse("add-crime");
     }
 
     public static SocketResponse getScannedVisitors(JsonObject data) {
