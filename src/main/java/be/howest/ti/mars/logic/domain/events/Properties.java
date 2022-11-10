@@ -12,7 +12,7 @@ import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonObject;
 
 public class Properties {
-    private static MarsH2Repository repo = Repositories.getH2Repo();
+    private static final MarsH2Repository repo = Repositories.getH2Repo();
 
     private Properties() {
     }
@@ -29,14 +29,12 @@ public class Properties {
         String status = "PENDING";
 
         repo.insertProperty(clientId, location, tier, x, y, width, height, status, description);
-
         return new StatusMessageEventResponse("Property added");
     }
 
     public static SocketResponse removeProperty(JsonObject data) {
         int id = Utils.getOrThrowInt(data, "id");
         repo.removeProperty(id);
-
         return new StatusMessageEventResponse("Property removed");
     }
 
@@ -49,7 +47,6 @@ public class Properties {
         int id = Utils.getOrThrowInt(data, "id");
         String status = Utils.getOrThrowString(data, "status");
         boolean success = repo.changePropertyStatus(id, status);
-
         return new SuccessEventResponse("change-property-status", success);
     }
 
@@ -66,8 +63,6 @@ public class Properties {
     }
 
     public static SocketResponse removeAllowedUser(JsonObject data) {
-        MarsH2Repository repo = Repositories.getH2Repo();
-
         String propertyId = Utils.getOrThrowString(data, "propertyId");
         String userId = Utils.getOrThrowString(data, "userId");
         boolean success = repo.removeAllowedUser(propertyId, userId);
