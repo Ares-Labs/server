@@ -8,7 +8,10 @@ import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import be.howest.ti.mars.logic.domain.response.SuccessEventResponse;
 import be.howest.ti.mars.web.bridge.SocketResponse;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.sql.ResultSet;
 
 public class Properties {
     private static final MarsH2Repository repo = Repositories.getH2Repo();
@@ -113,12 +116,27 @@ public class Properties {
     }
 
     public static SocketResponse getCrimesInArea(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        JsonObject result = new JsonObject();
+        JsonObject day1 = new JsonObject();
+        JsonObject day2 = new JsonObject();
+        JsonObject day3 = new JsonObject();
+
+        day1.put("day", 1);
+        day1.put("count", 2);
+        day2.put("day", 2);
+        day2.put("count", 1);
+        day3.put("day", 3);
+        day3.put("count", 4);
+
+        result.put("crimes", new JsonArray().add(day1).add(day2).add(day3));
+
+        return new DataEventResponse("get-crimes-in-area", result);
     }
 
     /// Should emit `events.crimes`
     public static SocketResponse addCrime(JsonObject data) {
-        return new ErrorEventResponse("Not implemented");
+        // Some SQL magic here
+        return new SuccessEventResponse("add-crime");
     }
 
     public static SocketResponse getScannedVisitors(JsonObject data) {
