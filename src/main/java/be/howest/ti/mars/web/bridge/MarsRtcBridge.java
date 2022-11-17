@@ -96,6 +96,7 @@ public class MarsRtcBridge {
         eh.addEventHandler("queries.add-equipment-property", Properties::addEquipmentProperty);
         eh.addEventHandler("queries.remove-equipment-property", Properties::removeEquipmentProperty);
         eh.addEventHandler("queries.get-equipment-property", Properties::getEquipmentProperty);
+        eh.addEventHandler("queries.change-property-tier", Properties::changePropertyTier);
 
         eh.addEventHandler("queries.request-remove-property", Properties::requestRemoveProperty);
         eh.addEventHandler("queries.get-requested-remove-properties", Properties::getRequestedRemoveProperties);

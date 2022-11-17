@@ -220,4 +220,11 @@ public class Properties {
         repo.approveRemoveProperty(propertyId);
         return new SuccessEventResponse("approve-remove-property");
     }
+
+    public static SocketResponse changePropertyTier(JsonObject data) {
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        int tier = Utils.getOrThrowInt(data, "tier");
+        repo.changePropertyTier(propertyId, tier);
+        return new SuccessEventResponse("change-property-tier");
+    }
 }

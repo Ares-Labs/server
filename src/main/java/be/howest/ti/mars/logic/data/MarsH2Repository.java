@@ -41,6 +41,7 @@ enum Queries {
     SQL_REQUEST_REMOVE_PROPERTY("UPDATE properties SET status = 'REMOVED' WHERE id = ?;"),
     SQL_GET_REQUESTED_REMOVE_PROPERTIES("SELECT * FROM properties WHERE status = 'REMOVED';"),
     SQL_APPROVE_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ? AND status = 'REMOVED';"),
+    SQL_CHANGE_PROPERTY_TIER("UPDATE properties SET tier = ? WHERE id = ?;"),
     ;
 
     private final String query;
@@ -549,6 +550,18 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not approve remove property.", ex);
             throw new RepositoryException("Could not approve remove property.");
+        }
+    }
+
+    public void changePropertyTier(int propertyId, int tier) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_CHANGE_PROPERTY_TIER.getQuery())) {
+            stmt.setInt(1, tier);
+            stmt.setInt(2, propertyId);
+
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not change property tier.", ex);
+            throw new RepositoryException("Could not change property tier.");
         }
     }
 }
