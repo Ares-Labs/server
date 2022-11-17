@@ -38,6 +38,9 @@ enum Queries {
     SQL_GET_EQUIPMENT_TYPES("SELECT * FROM equipment_types;"),
     SQL_GET_USER("SELECT * FROM users WHERE id = ?;"),
     SQL_GET_PROPERTIES("SELECT * FROM properties WHERE id IN (SELECT property_id FROM user_properties WHERE user_id = ?);"),
+    SQL_REQUEST_REMOVE_PROPERTY("UPDATE properties SET status = 'REMOVED' WHERE id = ?;"),
+    SQL_GET_REQUESTED_REMOVE_PROPERTIES("SELECT * FROM properties WHERE status = 'REMOVED';"),
+    SQL_APPROVE_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ? AND status = 'REMOVED';"),
     ;
 
     private final String query;
@@ -116,6 +119,19 @@ public class MarsH2Repository {
         return DriverManager.getConnection(url, username, password);
     }
 
+    private JsonObject makeProperty(ResultSet rs) throws SQLException {
+        JsonObject property = new JsonObject();
+        property.put("id", rs.getInt("id"));
+        property.put("location", rs.getString("location"));
+        property.put("x", rs.getInt("x"));
+        property.put("y", rs.getInt("y"));
+        property.put("width", rs.getInt("width"));
+        property.put("height", rs.getInt("height"));
+        property.put("status", rs.getString("status"));
+        property.put("tier", rs.getInt("tier"));
+        property.put("description", rs.getString("description"));
+        return property;
+    }
 
     public void insertProperty(String clientId, String location, int tier, int x, int y, String status, String description) {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_ADD_PROPERTY.getQuery(), Statement.RETURN_GENERATED_KEYS)) {
@@ -496,17 +512,43 @@ public class MarsH2Repository {
         }
     }
 
-    private JsonObject makeProperty(ResultSet rs) throws SQLException {
-        JsonObject property = new JsonObject();
-        property.put("id", rs.getInt("id"));
-        property.put("location", rs.getString("location"));
-        property.put("x", rs.getInt("x"));
-        property.put("y", rs.getInt("y"));
-        property.put("width", rs.getInt("width"));
-        property.put("height", rs.getInt("height"));
-        property.put("status", rs.getString("status"));
-        property.put("tier", rs.getInt("tier"));
-        property.put("description", rs.getString("description"));
-        return property;
+    public void requestRemoveProperty(int propertyId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_REQUEST_REMOVE_PROPERTY.getQuery())) {
+            stmt.setInt(1, propertyId);
+
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not request remove property.", ex);
+            throw new RepositoryException("Could not request remove property.");
+        }
+    }
+
+    public JsonObject getRequestedRemoveProperties() {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_REQUESTED_REMOVE_PROPERTIES.getQuery())) {
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray properties = new JsonArray();
+
+            while (rs.next()) {
+                properties.add(makeProperty(rs));
+            }
+
+            result.put("properties", properties);
+            return result;
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not get requested remove properties.", ex);
+            throw new RepositoryException("Could not get requested remove properties.");
+        }
+    }
+
+    public void approveRemoveProperty(int propertyId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_APPROVE_REMOVE_PROPERTY.getQuery())) {
+            stmt.setInt(1, propertyId);
+
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Could not approve remove property.", ex);
+            throw new RepositoryException("Could not approve remove property.");
+        }
     }
 }

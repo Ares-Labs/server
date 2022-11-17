@@ -136,6 +136,7 @@ public class Properties {
     /// Should emit `events.crimes`
     public static SocketResponse addCrime(JsonObject data) {
         // Some SQL magic here
+        Subscriptions.emit("events.crimes", new JsonObject().put("propertyId", 1).put("clientId", 1));
         return new SuccessEventResponse("add-crime");
     }
 
@@ -200,5 +201,23 @@ public class Properties {
     public static SocketResponse getEquipmentProperty(JsonObject data) {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         return new DataEventResponse("get-equipment", repo.getEquipmentProperty(propertyId));
+    }
+
+    /// Should emit `events.requested-remove-property`
+    public static SocketResponse requestRemoveProperty(JsonObject data) {
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        repo.requestRemoveProperty(propertyId);
+        Subscriptions.emit("events.requested-remove-property", new JsonObject().put("propertyId", propertyId));
+        return new ErrorEventResponse("Not implemented");
+    }
+
+    public static SocketResponse getRequestedRemoveProperties(JsonObject data) {
+        return new DataEventResponse("get-requested-remove-properties", repo.getRequestedRemoveProperties());
+    }
+
+    public static SocketResponse approveRemoveProperty(JsonObject data) {
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        repo.approveRemoveProperty(propertyId);
+        return new SuccessEventResponse("approve-remove-property");
     }
 }
