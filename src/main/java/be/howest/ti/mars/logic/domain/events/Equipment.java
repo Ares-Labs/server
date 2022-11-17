@@ -15,4 +15,14 @@ public class Equipment {
     public static SocketResponse getTypes(JsonObject data) {
         return new DataEventResponse("equipment-types", repo.getEquipmentTypes());
     }
+
+    public static SocketResponse dispatchDrone(JsonObject data) {
+        data.getInteger("propertyId");
+
+        // TODO: Manipulate in DB  to manage sent drones
+        JsonObject response = new JsonObject();
+        response.put("droneId", 1);
+
+        return new DataEventResponse("dispatch-drone", response);
+    }
 }
