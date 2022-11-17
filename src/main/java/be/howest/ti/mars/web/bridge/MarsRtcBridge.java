@@ -84,6 +84,7 @@ public class MarsRtcBridge {
         eh.addEventHandler("subscribe", Subscriptions::subscribe);
 
         eh.addEventHandler("queries.get-user", Users::getUser);
+        eh.addEventHandler("queries.get-user-properties", Users::getProperties);
         eh.addEventHandler("queries.get-equipment-types", Equipment::getTypes);
 
         eh.addEventHandler("queries.add-property", Properties::addProperty);
