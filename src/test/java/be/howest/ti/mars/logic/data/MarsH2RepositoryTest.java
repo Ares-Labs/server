@@ -220,6 +220,15 @@ class MarsH2RepositoryTest {
     }
 
     @Test
+    void addAuthEntry() {
+        JsonObject data = new JsonObject();
+        data.put("propertyId", 1);
+        data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
+
+        assertSuccessEventResponse(Properties.addAuthEntry(data));
+    }
+
+    @Test
     void getAuthEntries() {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
