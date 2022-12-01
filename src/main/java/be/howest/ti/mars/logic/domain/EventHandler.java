@@ -35,6 +35,8 @@ public class EventHandler {
     public SocketResponse handleIncomingEvent(JsonObject message) {
         LOGGER.log(Level.INFO, "Incoming event: {0}", message);
 
+        errorIfNull(message, "No message received");
+
         String type = message.getString("type");
         errorIfNull(type, "No type specified in message");
 
@@ -50,7 +52,6 @@ public class EventHandler {
         errorIfNull(data, "No data specified in message");
 
         String requestIdentifier = data.getString("requestIdentifier");
-
         if (requestIdentifier != null) {
             data.remove("requestIdentifier");
         }
