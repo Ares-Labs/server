@@ -42,7 +42,7 @@ public class MarsRtcBridge {
     }
 
     private void createSockJSHandler() {
-        final PermittedOptions permittedOptions = new PermittedOptions().setAddressRegex("events\\..+");
+        final PermittedOptions permittedOptions = new PermittedOptions().setAddressRegex(".*");
         final SockJSBridgeOptions options = new SockJSBridgeOptions()
                 .addInboundPermitted(permittedOptions)
                 .addOutboundPermitted(permittedOptions);
