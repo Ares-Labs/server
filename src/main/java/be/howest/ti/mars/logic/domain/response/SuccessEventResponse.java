@@ -11,10 +11,6 @@ public class SuccessEventResponse extends EventResponse {
         super(type, makeSuccessResponse(success));
     }
 
-    public SuccessEventResponse(String type, boolean success, String channel) {
-        super(type, makeSuccessResponse(success), channel);
-    }
-
     private static Map<String, Object> makeSuccessResponse(boolean success) {
         return Map.of("success", success);
     }
