@@ -6,9 +6,11 @@ import be.howest.ti.mars.logic.domain.events.Subscriptions;
 import be.howest.ti.mars.logic.domain.events.Users;
 import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.logic.domain.response.SuccessEventResponse;
+import be.howest.ti.mars.logic.exceptions.RepositoryException;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -45,12 +47,22 @@ class MarsH2RepositoryTest {
         assertInstanceOf(instance, SuccessEventResponse.class);
     }
 
+    private void handleRepositoryException(Runnable assertion) {
+        try {
+            assertion.run();
+        } catch (Exception e) {
+            if (!(e instanceof RepositoryException)) {
+                Assertions.fail("On failure, expected RepositoryException but got " + e.getClass().getName());
+            }
+        }
+    }
+
     @Test
     void getUser() {
         JsonObject data = new JsonObject();
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertDataEventResponse(Users.getUser(data));
+        handleRepositoryException(() -> assertDataEventResponse(Users.getUser(data)));
     }
 
     @Test
@@ -58,14 +70,14 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertDataEventResponse(Users.getProperties(data));
+        handleRepositoryException(() -> assertDataEventResponse(Users.getProperties(data)));
     }
 
     @Test
     void getEquipmentTypes() {
         JsonObject data = new JsonObject();
 
-        assertDataEventResponse(Equipment.getTypes(data));
+        handleRepositoryException(() -> assertDataEventResponse(Equipment.getTypes(data)));
     }
 
     @Test
@@ -73,7 +85,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertDataEventResponse(Equipment.dispatchDrone(data));
+        handleRepositoryException(() -> assertDataEventResponse(Equipment.dispatchDrone(data)));
     }
 
     @Test
@@ -86,7 +98,7 @@ class MarsH2RepositoryTest {
         data.put("description", "Test");
         data.put("clientId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertSuccessEventResponse(Properties.addProperty(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.addProperty(data)));
     }
 
     @Test
@@ -94,7 +106,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertSuccessEventResponse(Properties.removeProperty(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.removeProperty(data)));
     }
 
     @Test
@@ -102,7 +114,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertDataEventResponse(Properties.getProperty(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getProperty(data)));
     }
 
     @Test
@@ -111,7 +123,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("status", "Test");
 
-        assertSuccessEventResponse(Properties.changePropertyStatus(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.changePropertyStatus(data)));
     }
 
     @Test
@@ -121,14 +133,14 @@ class MarsH2RepositoryTest {
         data.put("width", 100);
         data.put("height", 100);
 
-        assertSuccessEventResponse(Properties.changePropertySize(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.changePropertySize(data)));
     }
 
     @Test
     void getPendingProperties() {
         JsonObject data = new JsonObject();
 
-        assertDataEventResponse(Properties.getPendingProperties(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getPendingProperties(data)));
     }
 
     @Test
@@ -136,7 +148,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertDataEventResponse(Properties.getAllowedUsers(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getAllowedUsers(data)));
     }
 
     @Test
@@ -145,7 +157,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertSuccessEventResponse(Properties.addAllowedUser(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.addAllowedUser(data)));
     }
 
     @Test
@@ -154,7 +166,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertSuccessEventResponse(Properties.removeAllowedUser(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.removeAllowedUser(data)));
     }
 
     @Test
@@ -162,7 +174,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertDataEventResponse(Properties.getAlerts(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getAlerts(data)));
     }
 
     @Test
@@ -171,7 +183,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertSuccessEventResponse(Properties.addAlert(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.addAlert(data)));
     }
 
     @Test
@@ -179,7 +191,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertDataEventResponse(Properties.getWeeklyVisitors(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getWeeklyVisitors(data)));
     }
 
     @Test
@@ -189,7 +201,7 @@ class MarsH2RepositoryTest {
         data.put("cameraId", 1);
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertSuccessEventResponse(Properties.addVisitor(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.addVisitor(data)));
     }
 
     @Test
@@ -197,7 +209,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertDataEventResponse(Properties.getCrimesInArea(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getCrimesInArea(data)));
     }
 
     @Test
@@ -206,7 +218,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("clientId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertSuccessEventResponse(Properties.addCrime(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.addCrime(data)));
     }
 
     @Test
@@ -216,7 +228,7 @@ class MarsH2RepositoryTest {
         data.put("from", "1000000000");
         data.put("to", "1669898648");
 
-        assertDataEventResponse(Properties.getScannedVisitors(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getScannedVisitors(data)));
     }
 
     @Test
@@ -225,7 +237,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertSuccessEventResponse(Properties.addAuthEntry(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.addAuthEntry(data)));
     }
 
     @Test
@@ -234,7 +246,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertDataEventResponse(Properties.getAuthEntries(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getAuthEntries(data)));
     }
 
     @Test
@@ -244,7 +256,7 @@ class MarsH2RepositoryTest {
         data.put("equipmentType", 1);
         data.put("description", "Test");
 
-        assertDataEventResponse(Properties.addEquipmentProperty(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.addEquipmentProperty(data)));
     }
 
     @Test
@@ -253,7 +265,7 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("equipmentId", 1);
 
-        assertSuccessEventResponse(Properties.removeEquipmentProperty(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.removeEquipmentProperty(data)));
     }
 
     @Test
@@ -261,7 +273,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertDataEventResponse(Properties.getEquipmentProperty(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getEquipmentProperty(data)));
     }
 
     @Test
@@ -269,14 +281,14 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertSuccessEventResponse(Properties.requestRemoveProperty(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.requestRemoveProperty(data)));
     }
 
     @Test
     void getRequestedRemoveProperties() {
         JsonObject data = new JsonObject();
 
-        assertDataEventResponse(Properties.getRequestedRemoveProperties(data));
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getRequestedRemoveProperties(data)));
     }
 
     @Test
@@ -284,7 +296,7 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("propertyId", 1);
 
-        assertSuccessEventResponse(Properties.approveRemoveProperty(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.approveRemoveProperty(data)));
     }
 
     @Test
@@ -293,6 +305,6 @@ class MarsH2RepositoryTest {
         data.put("propertyId", 1);
         data.put("tier", 1);
 
-        assertSuccessEventResponse(Properties.changePropertyTier(data));
+        handleRepositoryException(() -> assertSuccessEventResponse(Properties.changePropertyTier(data)));
     }
 }
