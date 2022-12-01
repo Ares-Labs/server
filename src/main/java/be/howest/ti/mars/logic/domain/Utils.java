@@ -8,7 +8,13 @@ public class Utils {
     private Utils() {
     }
 
-    private static <T> T getOrThrow(JsonObject data, String key, Function<JsonObject, T> getter) {
+    protected static <T> T getOrThrow(JsonObject data, String key, Function<JsonObject, T> getter) {
+        if (data == null) {
+            throw new IllegalArgumentException("data is null");
+        } else if (key == null || key.isBlank()) {
+            throw new IllegalArgumentException("Key cannot be null or empty");
+        }
+
         if (data.containsKey(key)) {
             try {
                 return getter.apply(data);
