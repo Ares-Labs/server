@@ -1,5 +1,6 @@
 package be.howest.ti.mars.logic.data;
 
+import be.howest.ti.mars.logic.domain.events.Equipment;
 import be.howest.ti.mars.logic.domain.events.Users;
 import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.web.bridge.SocketResponse;
@@ -28,12 +29,16 @@ class MarsH2RepositoryTest {
         }
     }
 
+    private <T> void assertDataEventResponse(T instance) {
+        assertInstanceOf(instance, DataEventResponse.class);
+    }
+
     @Test
     void getUser() {
         JsonObject data = new JsonObject();
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertInstanceOf(Users.getUser(data), DataEventResponse.class);
+        assertDataEventResponse(Users.getUser(data));
     }
 
     @Test
@@ -41,6 +46,21 @@ class MarsH2RepositoryTest {
         JsonObject data = new JsonObject();
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");
 
-        assertInstanceOf(Users.getProperties(data), DataEventResponse.class);
+        assertDataEventResponse(Users.getProperties(data));
+    }
+
+    @Test
+    void getEquipmentTypes() {
+        JsonObject data = new JsonObject();
+
+        assertDataEventResponse(Equipment.getTypes(data));
+    }
+
+    @Test
+    void dispatchDrone() {
+        JsonObject data = new JsonObject();
+        data.put("propertyId", 1);
+
+        assertDataEventResponse(Equipment.dispatchDrone(data));
     }
 }
