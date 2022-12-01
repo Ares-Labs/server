@@ -5,13 +5,10 @@ import be.howest.ti.mars.logic.data.Repositories;
 import be.howest.ti.mars.logic.domain.Utils;
 import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
-import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import be.howest.ti.mars.logic.domain.response.SuccessEventResponse;
 import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
-import java.sql.ResultSet;
 
 public class Properties {
     private static final MarsH2Repository repo = Repositories.getH2Repo();
@@ -29,7 +26,7 @@ public class Properties {
         String status = "PENDING";
 
         repo.insertProperty(clientId, location, tier, x, y, status, description);
-        return new StatusMessageEventResponse("Property added");
+        return new SuccessEventResponse("Property added");
     }
 
     public static SocketResponse removeProperty(JsonObject data) {
@@ -208,7 +205,7 @@ public class Properties {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         repo.requestRemoveProperty(propertyId);
         Subscriptions.emit("events.requested-remove-property", new JsonObject().put("propertyId", propertyId));
-        return new ErrorEventResponse("Not implemented");
+        return new SuccessEventResponse("request-remove-property");
     }
 
     public static SocketResponse getRequestedRemoveProperties(JsonObject data) {
