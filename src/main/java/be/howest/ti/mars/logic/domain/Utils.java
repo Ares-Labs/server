@@ -15,19 +15,15 @@ public class Utils {
             throw new IllegalArgumentException("Key cannot be null or empty");
         }
 
-        String argumentExceptionMessage;
-
         if (data.containsKey(key)) {
             try {
                 return getter.apply(data);
             } catch (ClassCastException e) {
-                argumentExceptionMessage = String.format("Invalid type for key '%s' in data", key);
+                throw new IllegalArgumentException(String.format("Invalid type for key '%s' in data", key));
             }
-        } else {
-            argumentExceptionMessage = String.format("Missing key '%s' in data", key);
         }
 
-        throw new IllegalArgumentException(argumentExceptionMessage);
+        throw new IllegalArgumentException(String.format("Missing key '%s' in data", key));
     }
 
     public static String getOrThrowString(JsonObject data, String key) {
