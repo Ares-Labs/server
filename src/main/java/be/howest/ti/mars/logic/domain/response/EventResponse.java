@@ -15,6 +15,12 @@ public class EventResponse extends BasicMessage {
     }
 
     public EventResponse(String type, Map<String, Object> data, String channel) {
+        if (type == null) {
+            throw new IllegalArgumentException("type cannot be null");
+        } else if (data == null) {
+            throw new IllegalArgumentException("data cannot be null");
+        }
+
         this.type = type;
         this.channel = channel;
         this.data = new HashMap<>(data);

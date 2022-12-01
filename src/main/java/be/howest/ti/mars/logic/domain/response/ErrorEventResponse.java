@@ -4,8 +4,4 @@ public class ErrorEventResponse extends MessageEventResponse {
     public ErrorEventResponse(String message) {
         super("error", message);
     }
-
-    public ErrorEventResponse(String message, String id) {
-        super("error", message, id);
-    }
 }
