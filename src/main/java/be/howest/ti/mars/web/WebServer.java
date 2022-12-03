@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class WebServer extends AbstractVerticle {
-    private static final String REALTIME_COMM_URI = "/api/events/*";
+    private static final String REALTIME_COMM_URI = "/events/*";
     private static final Logger LOGGER = Logger.getLogger(WebServer.class.getName());
     private final MarsOpenApiBridge openApiBridge;
     private final MarsRtcBridge rtcBridge;
