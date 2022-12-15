@@ -66,6 +66,16 @@ class MarsH2RepositoryTest {
     }
 
     @Test
+    void getUsers() {
+        JsonObject data = new JsonObject();
+        data.put("limit", 10);
+        data.put("offset", 0);
+        data.put("search", "");
+
+        handleRepositoryException(() -> assertDataEventResponse(Users.getUsers(data)));
+    }
+
+    @Test
     void getProperties() {
         JsonObject data = new JsonObject();
         data.put("userId", "9a0fbbc6-55f3-11ed-82ca-9313c9a89e82");

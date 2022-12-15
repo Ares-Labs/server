@@ -33,4 +33,20 @@ public class Utils {
     public static int getOrThrowInt(JsonObject data, String key) {
         return Utils.getOrThrow(data, key, d -> d.getInteger(key));
     }
+
+    protected static <T> T getOrDefault(JsonObject data, String key, Function<JsonObject, T> getter, T defaultValue) {
+        try {
+            return Utils.getOrThrow(data, key, getter);
+        } catch (IllegalArgumentException e) {
+            return defaultValue;
+        }
+    }
+
+    public static String getOrDefaultString(JsonObject data, String key, String defaultValue) {
+        return Utils.getOrDefault(data, key, d -> d.getString(key), defaultValue);
+    }
+
+    public static int getOrDefaultInt(JsonObject data, String key, int defaultValue) {
+        return Utils.getOrDefault(data, key, d -> d.getInteger(key), defaultValue);
+    }
 }
