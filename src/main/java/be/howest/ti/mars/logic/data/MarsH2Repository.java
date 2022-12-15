@@ -37,12 +37,13 @@ enum Queries {
     SQL_REMOVE_EQUIPMENT_PROPERTY("DELETE FROM installed_equipment WHERE property_id = ? AND id = ?;"),
     SQL_GET_EQUIPMENT_TYPES("SELECT * FROM equipment_types;"),
     SQL_GET_USER("SELECT * FROM users WHERE id = ?;"),
-    SQL_GET_PROPERTIES("SELECT * FROM properties WHERE id IN (SELECT property_id FROM user_properties WHERE user_id = ?);"),
+    SQL_GET_USER_PROPERTIES("SELECT * FROM properties WHERE id IN (SELECT property_id FROM user_properties WHERE user_id = ?);"),
     SQL_REQUEST_REMOVE_PROPERTY("UPDATE properties SET status = 'REMOVED' WHERE id = ?;"),
     SQL_GET_REQUESTED_REMOVE_PROPERTIES("SELECT * FROM properties WHERE status = 'REMOVED';"),
     SQL_APPROVE_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ? AND status = 'REMOVED';"),
     SQL_CHANGE_PROPERTY_TIER("UPDATE properties SET tier = ? WHERE id = ?;"),
-    SQL_GET_USERS("SELECT * FROM users WHERE id like CONCAT('%', ?, '%') OR full_name like CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
+    SQL_GET_USERS("SELECT * FROM users WHERE id ilike CONCAT('%', ?, '%') OR full_name ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
+    SQL_GET_PROPERTIES("SELECT * FROM properties WHERE id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
     ;
 
     private final String query;
@@ -495,7 +496,7 @@ public class MarsH2Repository {
     }
 
     public JsonObject getProperties(String userId) {
-        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PROPERTIES.getQuery())) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_USER_PROPERTIES.getQuery())) {
             stmt.setString(1, userId);
             ResultSet rs = stmt.executeQuery();
             JsonObject result = new JsonObject();
@@ -589,6 +590,29 @@ public class MarsH2Repository {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Could not get users.", e);
             throw new RepositoryException("Could not get users.");
+        }
+    }
+
+    public JsonObject getProperties(int limit, int offset, String search) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PROPERTIES.getQuery())) {
+            stmt.setString(1, search);
+            stmt.setString(2, search);
+            stmt.setInt(3, limit);
+            stmt.setInt(4, offset);
+
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray properties = new JsonArray();
+
+            while (rs.next()) {
+                properties.add(makeProperty(rs));
+            }
+
+            result.put("properties", properties);
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not get properties.", e);
+            throw new RepositoryException("Could not get properties.");
         }
     }
 }
