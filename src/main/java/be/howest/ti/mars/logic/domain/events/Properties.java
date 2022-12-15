@@ -224,4 +224,12 @@ public class Properties {
         repo.changePropertyTier(propertyId, tier);
         return new SuccessEventResponse("change-property-tier");
     }
+
+    public static SocketResponse getProperties(JsonObject data) {
+        int limit = Utils.getOrDefaultInt(data, "limit", 10);
+        int offset = Utils.getOrDefaultInt(data, "offset", 0);
+        String search = Utils.getOrDefaultString(data, "search", "");
+
+        return new DataEventResponse("get-properties", repo.getProperties(limit, offset, search));
+    }
 }
