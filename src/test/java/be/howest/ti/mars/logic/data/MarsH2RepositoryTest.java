@@ -84,6 +84,16 @@ class MarsH2RepositoryTest {
     }
 
     @Test
+    void getPropertiesFilter() {
+        JsonObject data = new JsonObject();
+        data.put("limit", 10);
+        data.put("offset", 0);
+        data.put("search", "");
+
+        handleRepositoryException(() -> assertDataEventResponse(Properties.getProperties(data)));
+    }
+
+    @Test
     void getEquipmentTypes() {
         JsonObject data = new JsonObject();
 
