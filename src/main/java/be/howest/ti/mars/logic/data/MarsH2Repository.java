@@ -42,6 +42,7 @@ enum Queries {
     SQL_GET_REQUESTED_REMOVE_PROPERTIES("SELECT * FROM properties WHERE status = 'REMOVED';"),
     SQL_APPROVE_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ? AND status = 'REMOVED';"),
     SQL_CHANGE_PROPERTY_TIER("UPDATE properties SET tier = ? WHERE id = ?;"),
+    SQL_GET_USERS("SELECT * FROM users WHERE id like CONCAT('%', ?, '%') OR full_name like CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
     ;
 
     private final String query;
@@ -562,6 +563,32 @@ public class MarsH2Repository {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not change property tier.", ex);
             throw new RepositoryException("Could not change property tier.");
+        }
+    }
+
+    public JsonObject getUsers(int limit, int offset, String search) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_USERS.getQuery())) {
+            stmt.setString(1, search);
+            stmt.setString(2, search);
+            stmt.setInt(3, limit);
+            stmt.setInt(4, offset);
+
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray users = new JsonArray();
+
+            while (rs.next()) {
+                JsonObject user = new JsonObject();
+                user.put("id", rs.getString("id"));
+                user.put("fullName", rs.getString("full_name"));
+                users.add(user);
+            }
+
+            result.put("users", users);
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not get users.", e);
+            throw new RepositoryException("Could not get users.");
         }
     }
 }
