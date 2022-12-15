@@ -42,7 +42,7 @@ enum Queries {
     SQL_GET_REQUESTED_REMOVE_PROPERTIES("SELECT * FROM properties WHERE status = 'REMOVED';"),
     SQL_APPROVE_REMOVE_PROPERTY("DELETE FROM properties WHERE id = ? AND status = 'REMOVED';"),
     SQL_CHANGE_PROPERTY_TIER("UPDATE properties SET tier = ? WHERE id = ?;"),
-    SQL_GET_USERS("SELECT * FROM users WHERE id like CONCAT('%', ?, '%') OR full_name like CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
+    SQL_GET_USERS("SELECT * FROM users WHERE id ilike CONCAT('%', ?, '%') OR full_name ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
     ;
 
     private final String query;
