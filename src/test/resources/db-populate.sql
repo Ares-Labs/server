@@ -25,7 +25,9 @@ INSERT INTO installed_equipment (description, property_id, type)
 VALUES ('east camera', 1, 1),
        ('west camera', 1, 1),
        ('entry batch', 2, 2),
-       ('central camera', 2, 1);
+       ('central camera', 2, 1),
+       ('drone', 1, 3),
+       ('drone', 2, 3);
 
 -- Set Frankenstein as the owner of wallstreet and howest
 INSERT INTO user_properties (user_id, property_id)

@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +46,10 @@ enum Queries {
     SQL_CHANGE_PROPERTY_TIER("UPDATE properties SET tier = ? WHERE id = ?;"),
     SQL_GET_USERS("SELECT * FROM users WHERE id ilike CONCAT('%', ?, '%') OR full_name ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
     SQL_GET_PROPERTIES("SELECT * FROM properties WHERE id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
+    // This is probably the most inefficient query ever written, but it works
+    SQL_GET_FREE_DRONES("SELECT * FROM installed_equipment WHERE type = (SELECT type FROM equipment_types WHERE name = 'Drone') AND property_id = ? AND id NOT IN (SELECT installed_id FROM dispatched_drones);"),
+    SQL_DISPATCH_DRONE("INSERT INTO dispatched_drones (installed_id) VALUES (?);"),
+    SQL_GET_DISPATCHED_DRONES("SELECT * FROM installed_equipment WHERE id in (SELECT installed_id FROM dispatched_drones WHERE returned_at IS NULL) AND (id ilike CONCAT('%', ?, '%') OR description ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
     ;
 
     private final String query;
@@ -613,6 +619,62 @@ public class MarsH2Repository {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Could not get properties.", e);
             throw new RepositoryException("Could not get properties.");
+        }
+    }
+
+    public List<Integer> getFreeDrones(int propertyId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_FREE_DRONES.getQuery())) {
+            stmt.setInt(1, propertyId);
+
+            ResultSet rs = stmt.executeQuery();
+            List<Integer> result = new ArrayList<>();
+
+            while (rs.next()) {
+                result.add(rs.getInt("id"));
+            }
+
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not get free drones.", e);
+            throw new RepositoryException("Could not get free drones.");
+        }
+    }
+
+    public void dispatchDrone(int droneId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_DISPATCH_DRONE.getQuery())) {
+            stmt.setInt(1, droneId);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not dispatch drone.", e);
+            throw new RepositoryException("Could not dispatch drone.");
+        }
+    }
+
+    public JsonObject getDispatchedDrones(int limit, int offset, String search) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_DISPATCHED_DRONES.getQuery())) {
+            stmt.setString(1, search);
+            stmt.setString(2, search);
+            stmt.setInt(3, limit);
+            stmt.setInt(4, offset);
+
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+            JsonArray drones = new JsonArray();
+
+            while (rs.next()) {
+                JsonObject drone = new JsonObject();
+                drone.put("id", rs.getInt("id"));
+                drone.put("description", rs.getString("description"));
+                drone.put("propertyId", rs.getInt("property_id"));
+                drones.add(drone);
+            }
+
+            result.put("drones", drones);
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not get dispatched drones.", e);
+            throw new RepositoryException("Could not get dispatched drones.");
         }
     }
 }
