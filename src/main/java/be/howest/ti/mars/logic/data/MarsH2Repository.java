@@ -50,6 +50,7 @@ enum Queries {
     SQL_GET_FREE_DRONES("SELECT * FROM installed_equipment WHERE type = (SELECT type FROM equipment_types WHERE name = 'Drone') AND property_id = ? AND id NOT IN (SELECT installed_id FROM dispatched_drones);"),
     SQL_DISPATCH_DRONE("INSERT INTO dispatched_drones (installed_id) VALUES (?);"),
     SQL_GET_DISPATCHED_DRONES("SELECT * FROM installed_equipment WHERE id in (SELECT installed_id FROM dispatched_drones WHERE returned_at IS NULL) AND (id ilike CONCAT('%', ?, '%') OR description ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
+    SQL_SEARCH_STATUS_PROPERTIES("SELECT * FROM properties WHERE status = ? AND (id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
     ;
 
     private final String query;
@@ -534,16 +535,7 @@ public class MarsH2Repository {
 
     public JsonObject getRequestedRemoveProperties() {
         try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_REQUESTED_REMOVE_PROPERTIES.getQuery())) {
-            ResultSet rs = stmt.executeQuery();
-            JsonObject result = new JsonObject();
-            JsonArray properties = new JsonArray();
-
-            while (rs.next()) {
-                properties.add(makeProperty(rs));
-            }
-
-            result.put("properties", properties);
-            return result;
+            return getEntries(stmt);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not get requested remove properties.", ex);
             throw new RepositoryException("Could not get requested remove properties.");
@@ -606,16 +598,7 @@ public class MarsH2Repository {
             stmt.setInt(3, limit);
             stmt.setInt(4, offset);
 
-            ResultSet rs = stmt.executeQuery();
-            JsonObject result = new JsonObject();
-            JsonArray properties = new JsonArray();
-
-            while (rs.next()) {
-                properties.add(makeProperty(rs));
-            }
-
-            result.put("properties", properties);
-            return result;
+            return getEntries(stmt);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Could not get properties.", e);
             throw new RepositoryException("Could not get properties.");
@@ -676,5 +659,41 @@ public class MarsH2Repository {
             LOGGER.log(Level.SEVERE, "Could not get dispatched drones.", e);
             throw new RepositoryException("Could not get dispatched drones.");
         }
+    }
+
+    private JsonObject searchStatusProperties(String status, String search, int limit, int offset) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_SEARCH_STATUS_PROPERTIES.getQuery())) {
+            stmt.setString(1, status);
+            stmt.setString(2, search);
+            stmt.setString(3, search);
+            stmt.setInt(4, limit);
+            stmt.setInt(5, offset);
+
+            return getEntries(stmt);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not search properties.", e);
+            throw new RepositoryException("Could not search properties.");
+        }
+    }
+
+    private JsonObject getEntries(PreparedStatement stmt) throws SQLException {
+        ResultSet rs = stmt.executeQuery();
+        JsonObject result = new JsonObject();
+        JsonArray properties = new JsonArray();
+
+        while (rs.next()) {
+            properties.add(makeProperty(rs));
+        }
+
+        result.put("properties", properties);
+        return result;
+    }
+
+    public JsonObject searchPendingProperties(String search, int limit, int offset) {
+        return searchStatusProperties("PENDING", search, limit, offset);
+    }
+
+    public JsonObject searchRemovalProperties(String search, int limit, int offset) {
+        return searchStatusProperties("REMOVED", search, limit, offset);
     }
 }
