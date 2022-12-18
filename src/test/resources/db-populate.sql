@@ -5,7 +5,8 @@ VALUES ('Basic', 59.99),
 
 INSERT INTO `equipment_types` (name)
 VALUES ('Camera'),
-       ('Batch');
+       ('Batch'),
+       ('Drone');
 
 -- Sample data:
 
