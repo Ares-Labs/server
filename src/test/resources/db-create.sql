@@ -90,6 +90,17 @@ CREATE TABLE IF NOT EXISTS `installed_equipment`
         ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS `dispatched_drones` (
+    installed_id INTEGER NOT NULL,
+    dispatched_at TIMESTAMP NOT NULL,
+    returned_at TIMESTAMP,
+
+    PRIMARY KEY (installed_id, dispatched_at),
+    FOREIGN KEY (installed_id) REFERENCES installed_equipment (id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS `alerts`
 (
     id          INTEGER     NOT NULL AUTO_INCREMENT PRIMARY KEY,

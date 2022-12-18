@@ -232,4 +232,20 @@ public class Properties {
 
         return new DataEventResponse("get-properties", repo.getProperties(limit, offset, search));
     }
+
+    public static SocketResponse searchPendingProperties(JsonObject data) {
+        String search = Utils.getOrDefaultString(data, "search", "");
+        int limit = Utils.getOrDefaultInt(data, "limit", 10);
+        int offset = Utils.getOrDefaultInt(data, "offset", 0);
+
+        return new DataEventResponse("search-pending-properties", repo.searchPendingProperties(search, limit, offset));
+    }
+
+    public static SocketResponse searchRemovalProperties(JsonObject data) {
+        String search = Utils.getOrDefaultString(data, "search", "");
+        int limit = Utils.getOrDefaultInt(data, "limit", 10);
+        int offset = Utils.getOrDefaultInt(data, "offset", 0);
+
+        return new DataEventResponse("search-removal-properties", repo.searchRemovalProperties(search, limit, offset));
+    }
 }
