@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `dispatched_drones` (
     FOREIGN KEY (installed_id) REFERENCES installed_equipment (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS `alerts`
 (
