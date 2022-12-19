@@ -1,7 +1,8 @@
 drop table if exists `user_properties`;
+drop table if exists `dispatched_drones`;
 drop table if exists `property_whitelists`;
 drop table if exists `alerts`;
-drop table if exists `authorisations`;
+drop table if exists `authorizations`;
 drop table if exists `scans`;
 drop table if exists `users`;
 drop table if exists `installed_equipment`;

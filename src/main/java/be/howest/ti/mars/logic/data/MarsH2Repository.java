@@ -46,11 +46,12 @@ enum Queries {
     SQL_CHANGE_PROPERTY_TIER("UPDATE properties SET tier = ? WHERE id = ?;"),
     SQL_GET_USERS("SELECT * FROM users WHERE id ilike CONCAT('%', ?, '%') OR full_name ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
     SQL_GET_PROPERTIES("SELECT * FROM properties WHERE id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
-    // This is probably the most inefficient query ever written, but it works
     SQL_GET_FREE_DRONES("SELECT * FROM installed_equipment WHERE type = (SELECT type FROM equipment_types WHERE name = 'Drone') AND property_id = ? AND id not IN (SELECT installed_id FROM dispatched_drones where returned_at is null);"),
     SQL_DISPATCH_DRONE("INSERT INTO dispatched_drones (installed_id) VALUES (?);"),
-    SQL_GET_DISPATCHED_DRONES("SELECT * FROM installed_equipment WHERE id in (SELECT installed_id FROM dispatched_drones WHERE returned_at IS NULL) AND (id ilike CONCAT('%', ?, '%') OR description ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
+    SQL_GET_DISPATCHED_DRONES("SELECT * FROM installed_equipment WHERE id in (SELECT installed_id FROM dispatched_drones WHERE returned_at IS NULL)  AND (id ilike CONCAT('%', ?, '%') OR description ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
     SQL_SEARCH_STATUS_PROPERTIES("SELECT * FROM properties WHERE status = ? AND (id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
+    SQL_RECALL_DRONE("UPDATE dispatched_drones SET returned_at = NOW() WHERE installed_id = ?;"),
+    // This is probably the most inefficient query ever written, but it works
     SQL_GET_PROPERTY_DETAILED("SELECT p.id AS property_id, p.location AS property_location, p.description AS property_description, p.x AS property_x, p.y AS property_y, p.width AS property_width, p.height AS property_height, p.status AS property_status, t.ID AS tier_id, t.name AS tier_name, u.id AS owner_id, u.full_name AS owner_full_name FROM properties p JOIN user_properties o ON p.id = o.property_id JOIN users u ON o.user_id = u.id JOIN tiers t ON p.tier = t.id WHERE p.id = ?;"),
     SQL_CHANGE_PROPERTY_COORDINATES("UPDATE properties SET x = ?, y = ? WHERE id = ?;"),
     ;
@@ -742,6 +743,17 @@ public class MarsH2Repository {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Could not change property location.", e);
             throw new RepositoryException("Could not change property location.");
+        }
+    }
+
+    public void recallDrone(int droneId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_RECALL_DRONE.getQuery())) {
+            stmt.setInt(1, droneId);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not recall drone.", e);
+            throw new RepositoryException("Could not recall drone.");
         }
     }
 }

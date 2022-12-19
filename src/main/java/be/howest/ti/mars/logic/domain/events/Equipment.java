@@ -5,6 +5,7 @@ import be.howest.ti.mars.logic.data.Repositories;
 import be.howest.ti.mars.logic.domain.Utils;
 import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
+import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonObject;
 
@@ -46,5 +47,12 @@ public class Equipment {
 
         return new DataEventResponse("dispatched-drones", repo.getDispatchedDrones(limit, offset, search));
 
+    }
+
+    public static SocketResponse recallDrone(JsonObject data) {
+        int droneId = data.getInteger("droneId");
+        repo.recallDrone(droneId);
+
+        return new StatusMessageEventResponse("recall-drone");
     }
 }
