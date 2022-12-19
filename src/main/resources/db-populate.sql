@@ -56,4 +56,4 @@ INSERT INTO scans (timestamp, property_id, user_id, camera_id)
 VALUES ('2022-11-4 00:00:00', 1, 'bedb80fc-55f3-11ed-b681-07688aa63f8a', 1);
 
 INSERT INTO dispatched_drones (installed_id)
-VALUES (1), (2);
+VALUES (5), (6);
