@@ -253,4 +253,12 @@ public class Properties {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         return new DataEventResponse("get-property-detailed", repo.getPropertyDetailed(propertyId));
     }
+
+    public static SocketResponse changePropertyCoordinates(JsonObject data) {
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        int x = Utils.getOrThrowInt(data, "x");
+        int y = Utils.getOrThrowInt(data, "y");
+        repo.changePropertyCoordinates(propertyId, x, y);
+        return new SuccessEventResponse("change-property-location");
+    }
 }
