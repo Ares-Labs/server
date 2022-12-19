@@ -248,4 +248,9 @@ public class Properties {
 
         return new DataEventResponse("search-removal-properties", repo.searchRemovalProperties(search, limit, offset));
     }
+
+    public static SocketResponse getPropertyDetailed(JsonObject data) {
+        int propertyId = Utils.getOrThrowInt(data, "propertyId");
+        return new DataEventResponse("get-property-detailed", repo.getPropertyDetailed(propertyId));
+    }
 }

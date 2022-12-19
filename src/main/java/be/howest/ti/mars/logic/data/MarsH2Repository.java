@@ -51,7 +51,7 @@ enum Queries {
     SQL_DISPATCH_DRONE("INSERT INTO dispatched_drones (installed_id) VALUES (?);"),
     SQL_GET_DISPATCHED_DRONES("SELECT * FROM installed_equipment WHERE id in (SELECT installed_id FROM dispatched_drones WHERE returned_at IS NULL) AND (id ilike CONCAT('%', ?, '%') OR description ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
     SQL_SEARCH_STATUS_PROPERTIES("SELECT * FROM properties WHERE status = ? AND (id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
-    ;
+    SQL_GET_PROPERTY_DETAILED("SELECT p.id AS property_id, p.location AS property_location, p.description AS property_description, p.x AS property_x, p.y AS property_y, p.width AS property_width, p.height AS property_height, p.status AS property_status, t.ID AS tier_id, t.name AS tier_name, u.id AS owner_id, u.full_name AS owner_full_name FROM properties p JOIN user_properties o ON p.id = o.property_id JOIN users u ON o.user_id = u.id JOIN tiers t ON p.tier = t.id WHERE p.id = ?;");
 
     private final String query;
 
@@ -695,5 +695,37 @@ public class MarsH2Repository {
 
     public JsonObject searchRemovalProperties(String search, int limit, int offset) {
         return searchStatusProperties("REMOVED", search, limit, offset);
+    }
+
+    public JsonObject getPropertyDetailed(int propertyId) {
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(Queries.SQL_GET_PROPERTY_DETAILED.getQuery())) {
+            stmt.setInt(1, propertyId);
+
+            ResultSet rs = stmt.executeQuery();
+            JsonObject result = new JsonObject();
+
+            if (rs.next()) {
+                result.put("id", rs.getInt("property_id"));
+                result.put("location", rs.getString("property_location"));
+                result.put("x", rs.getInt("property_x"));
+                result.put("y", rs.getInt("property_y"));
+                result.put("width", rs.getInt("property_width"));
+                result.put("height", rs.getInt("property_height"));
+                result.put("status", rs.getString("property_status"));
+                result.put("description", rs.getString("property_description"));
+                result.put("tier", rs.getString("tier_id"));
+                result.put("tier_name", rs.getString("tier_name"));
+                result.put("owner", rs.getString("owner_id"));
+                result.put("owner_full_name", rs.getString("owner_full_name"));
+
+                JsonObject equipment = getEquipmentProperty(propertyId);
+                result.put("equipment", equipment.getValue("equipment"));
+            }
+
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Could not get property detailed.", e);
+            throw new RepositoryException("Could not get property detailed.");
+        }
     }
 }
