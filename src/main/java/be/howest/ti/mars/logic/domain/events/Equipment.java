@@ -31,6 +31,8 @@ public class Equipment {
         int droneId = drones.get(0);
         repo.dispatchDrone(droneId);
 
+        Subscriptions.emit("events.drone-dispatched", new JsonObject().put("droneId", droneId));
+
         JsonObject response = new JsonObject();
         response.put("droneId", droneId);
 

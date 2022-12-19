@@ -47,7 +47,7 @@ enum Queries {
     SQL_GET_USERS("SELECT * FROM users WHERE id ilike CONCAT('%', ?, '%') OR full_name ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
     SQL_GET_PROPERTIES("SELECT * FROM properties WHERE id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%') LIMIT ? OFFSET ?;"),
     // This is probably the most inefficient query ever written, but it works
-    SQL_GET_FREE_DRONES("SELECT * FROM installed_equipment WHERE type = (SELECT type FROM equipment_types WHERE name = 'Drone') AND property_id = ? AND id NOT IN (SELECT installed_id FROM dispatched_drones);"),
+    SQL_GET_FREE_DRONES("SELECT * FROM installed_equipment WHERE type = (SELECT type FROM equipment_types WHERE name = 'Drone') AND property_id = ? AND id not IN (SELECT installed_id FROM dispatched_drones where returned_at is null);"),
     SQL_DISPATCH_DRONE("INSERT INTO dispatched_drones (installed_id) VALUES (?);"),
     SQL_GET_DISPATCHED_DRONES("SELECT * FROM installed_equipment WHERE id in (SELECT installed_id FROM dispatched_drones WHERE returned_at IS NULL) AND (id ilike CONCAT('%', ?, '%') OR description ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
     SQL_SEARCH_STATUS_PROPERTIES("SELECT * FROM properties WHERE status = ? AND (id ilike CONCAT('%', ?, '%') OR location ilike CONCAT('%', ?, '%')) LIMIT ? OFFSET ?;"),
