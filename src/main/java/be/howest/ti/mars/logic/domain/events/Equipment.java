@@ -54,6 +54,8 @@ public class Equipment {
         int droneId = data.getInteger("droneId");
         repo.recallDrone(droneId);
 
+        Subscriptions.emit("events.drone-recalled", new JsonObject().put("droneId", droneId));
+
         return new StatusMessageEventResponse("recall-drone");
     }
 
