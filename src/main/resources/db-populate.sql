@@ -19,7 +19,8 @@ VALUES ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 'John Doe'),
 -- Create properties
 INSERT INTO properties (location, x, y, width, height, tier, status, description)
 VALUES ('wallstreet', 10, 10, 1200, 50, 3, 'PAID', 'Amazing wallstreet'),
-       ('howest', 10, 60, 500, 500, 2, 'PENDING', 'Howest Brugge');
+       ('howest', 10, 60, 500, 500, 2, 'PENDING', 'Howest Brugge'),
+       ('brussels', -1000, -20, 1000, 100, 3, 'REMOVED', 'Brussels (Belgium)');
 
 -- Install equipment
 INSERT INTO installed_equipment (description, property_id, type)
