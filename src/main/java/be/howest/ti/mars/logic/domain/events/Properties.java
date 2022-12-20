@@ -230,7 +230,9 @@ public class Properties {
     public static SocketResponse changePropertyTier(JsonObject data) {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         int tier = Utils.getOrThrowInt(data, "tier");
+
         repo.changePropertyTier(propertyId, tier);
+        Subscriptions.emit("events.property-tier-changed", new JsonObject().put("propertyId", propertyId).put("tier", tier));
         return new SuccessEventResponse("change-property-tier");
     }
 
