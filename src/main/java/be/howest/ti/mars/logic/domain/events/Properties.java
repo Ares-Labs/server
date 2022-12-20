@@ -26,6 +26,7 @@ public class Properties {
         String status = "PENDING";
 
         repo.insertProperty(clientId, location, tier, x, y, status, description);
+        Subscriptions.emit("events.property-added", data);
         return new SuccessEventResponse("Property added");
     }
 
@@ -44,6 +45,7 @@ public class Properties {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         String status = Utils.getOrThrowString(data, "status");
         repo.changePropertyStatus(propertyId, status);
+        Subscriptions.emit("events.property-status-change", data);
         return new SuccessEventResponse("change-property-status");
     }
 
