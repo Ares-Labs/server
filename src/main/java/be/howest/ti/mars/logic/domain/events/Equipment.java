@@ -32,6 +32,8 @@ public class Equipment {
         int droneId = drones.get(0);
         repo.dispatchDrone(droneId);
 
+        Subscriptions.emit("events.drone-dispatched", new JsonObject().put("droneId", droneId));
+
         JsonObject response = new JsonObject();
         response.put("droneId", droneId);
 
@@ -50,6 +52,8 @@ public class Equipment {
     public static SocketResponse recallDrone(JsonObject data) {
         int droneId = data.getInteger("droneId");
         repo.recallDrone(droneId);
+
+        Subscriptions.emit("events.drone-recalled", new JsonObject().put("droneId", droneId));
 
         return new StatusMessageEventResponse("recall-drone");
     }

@@ -94,8 +94,10 @@ public class MarsRtcBridge {
         eh.addEventHandler("queries.add-property", Properties::addProperty);
         eh.addEventHandler("queries.remove-property", Properties::removeProperty);
         eh.addEventHandler("queries.get-property", Properties::getProperty);
+        eh.addEventHandler("queries.get-property-detailed", Properties::getPropertyDetailed);
         eh.addEventHandler("queries.get-properties", Properties::getProperties);
         eh.addEventHandler("queries.change-property-size", Properties::changePropertySize);
+        eh.addEventHandler("queries.change-property-coordinates", Properties::changePropertyCoordinates);
         eh.addEventHandler("queries.change-property-status", Properties::changePropertyStatus);
         eh.addEventHandler("queries.get-pending-properties", Properties::getPendingProperties);
         eh.addEventHandler("queries.add-equipment-property", Properties::addEquipmentProperty);
