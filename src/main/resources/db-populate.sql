@@ -54,6 +54,3 @@ VALUES ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 1, 1),
 
 INSERT INTO scans (timestamp, property_id, user_id, camera_id)
 VALUES ('2022-11-4 00:00:00', 1, 'bedb80fc-55f3-11ed-b681-07688aa63f8a', 1);
-
-INSERT INTO dispatched_drones (installed_id)
-VALUES (5), (6);

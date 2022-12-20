@@ -89,6 +89,7 @@ public class MarsRtcBridge {
         eh.addEventHandler("queries.get-equipment-types", Equipment::getTypes);
         eh.addEventHandler("queries.dispatch-drone", Equipment::dispatchDrone);
         eh.addEventHandler("queries.get-dispatched-drones", Equipment::getDispatchedDrones);
+        eh.addEventHandler("queries.get-free-drones", Equipment::getFreeDrones);
         eh.addEventHandler("queries.recall-drone", Equipment::recallDrone);
 
         eh.addEventHandler("queries.add-property", Properties::addProperty);

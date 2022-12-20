@@ -53,6 +53,13 @@ public class Properties {
         int height = Utils.getOrThrowInt(data, "height");
 
         repo.changePropertySize(propertyId, width, height);
+        Subscriptions.emit(
+                "events.property-size-changed",
+                new JsonObject()
+                        .put("propertyId", propertyId)
+                        .put("width", width)
+                        .put("height", height)
+        );
         return new SuccessEventResponse("change-property-size");
     }
 
@@ -258,7 +265,9 @@ public class Properties {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         int x = Utils.getOrThrowInt(data, "x");
         int y = Utils.getOrThrowInt(data, "y");
+
         repo.changePropertyCoordinates(propertyId, x, y);
+        Subscriptions.emit("events.property-coordinates-changed", new JsonObject().put("propertyId", propertyId).put("x", x).put("y", y));
         return new SuccessEventResponse("change-property-location");
     }
 }
