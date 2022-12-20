@@ -7,6 +7,7 @@ import be.howest.ti.mars.logic.domain.response.DataEventResponse;
 import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.StatusMessageEventResponse;
 import be.howest.ti.mars.web.bridge.SocketResponse;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -56,5 +57,15 @@ public class Equipment {
         Subscriptions.emit("events.drone-recalled", new JsonObject().put("droneId", droneId));
 
         return new StatusMessageEventResponse("recall-drone");
+    }
+
+    public static SocketResponse getFreeDrones(JsonObject data) {
+        int propertyId = data.getInteger("propertyId");
+        List<Integer> drones = repo.getFreeDrones(propertyId);
+
+        JsonObject response = new JsonObject();
+        response.put("drones", new JsonArray(drones));
+
+        return new DataEventResponse("get-free-drones", response);
     }
 }
