@@ -224,6 +224,8 @@ public class Properties {
     public static SocketResponse approveRemoveProperty(JsonObject data) {
         int propertyId = Utils.getOrThrowInt(data, "propertyId");
         repo.approveRemoveProperty(propertyId);
+
+        Subscriptions.emit("events.approved-remove-property", new JsonObject().put("propertyId", propertyId));
         return new SuccessEventResponse("approve-remove-property");
     }
 
