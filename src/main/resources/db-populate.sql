@@ -53,8 +53,8 @@ VALUES ('east camera', 1, 1),
 
 -- Set Frankenstein as the owner of wallstreet and howest
 INSERT INTO user_properties (user_id, property_id)
-VALUES ('bedb80fc-55f3-11ed-b681-07688aa63f8a', 1),
-       ('bedb80fc-55f3-11ed-b681-07688aa63f8a', 2);
+VALUES ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 1),
+       ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 2);
 
 -- Add John and Jane as white-listed for each property
 INSERT INTO property_whitelists (user_id, property_id)
