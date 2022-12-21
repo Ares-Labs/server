@@ -1,3 +1,28 @@
+# Documentation about setting up the server
+This document will explain how you can deploy the server side of the POC on your device.
+
+## Prerequisites
+1. Make sure you've got `node` installed
+2. Make sure you've got `npm` installed
+3. Make sure you've got `java` installed
+
+## cloning from git
+To get started with the project, you will first have to clone the client repo from git. This can be done in 2 ways!
+## Clone the client:
+* SSH: `git@git.ti.howest.be:TI/2022-2023/s3/analysis-and-development-project/projects/group-06/server.git`
+* HTTPS: `https://git.ti.howest.be/TI/2022-2023/s3/analysis-and-development-project/projects/group-06/server.git`
+
+## User guide
+1. Use you favorite IDE and open the server directory in it. 
+2. click on Gradle on the right corner, click application an dubble click run button.
+3. If the client is already configured on your pc, you can just use your terminal and type `npm run dev`. If this is not the case follow the steps in the client README
+>* [Client README](https://git.ti.howest.be/TI/2022-2023/s3/analysis-and-development-project/projects/group-06/client/-/blob/main/README.md)
+
+
+
+
+
+
 # Analysis & Development Project - Mars 2052 - server project
 
 This is the **server side start-project** for Project II. 
