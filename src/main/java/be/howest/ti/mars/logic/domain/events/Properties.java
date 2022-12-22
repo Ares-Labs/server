@@ -4,7 +4,6 @@ import be.howest.ti.mars.logic.data.MarsH2Repository;
 import be.howest.ti.mars.logic.data.Repositories;
 import be.howest.ti.mars.logic.domain.Utils;
 import be.howest.ti.mars.logic.domain.response.DataEventResponse;
-import be.howest.ti.mars.logic.domain.response.ErrorEventResponse;
 import be.howest.ti.mars.logic.domain.response.SuccessEventResponse;
 import be.howest.ti.mars.web.bridge.SocketResponse;
 import io.vertx.core.json.JsonArray;
