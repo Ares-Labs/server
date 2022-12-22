@@ -24,7 +24,6 @@ import java.util.logging.Logger;
  */
 public class MarsOpenApiBridge {
     private static final Logger LOGGER = Logger.getLogger(MarsOpenApiBridge.class.getName());
-//    private final MarsController controller;
 
     public MarsOpenApiBridge() {
         // Creates new instance of the controller
@@ -36,10 +35,6 @@ public class MarsOpenApiBridge {
 
         LOGGER.log(Level.INFO, "Installing failure handlers for all operations");
         routerBuilder.operations().forEach(op -> op.failureHandler(this::onFailedRequest));
-
-        // TODO: Add a handler for each operation in the OpenAPI spec.
-        // LOGGER.log(Level.INFO, "Installing handler for: getQuote");
-        // routerBuilder.operation("getQuote").handler(this::getQuote);
 
         LOGGER.log(Level.INFO, "All handlers are installed, creating router.");
         return routerBuilder.createRouter();

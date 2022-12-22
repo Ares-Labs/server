@@ -14,18 +14,6 @@ public class Response {
     private Response() {
     }
 
-//    public static void sendQuote(RoutingContext ctx, Quote quote) {
-//        sendOkJsonResponse(ctx, JsonObject.mapFrom(quote));
-//    }
-//
-//    public static void sendQuoteCreated(RoutingContext ctx, Quote quote) {
-//        sendJsonResponse(ctx, 201, JsonObject.mapFrom(quote));
-//    }
-//
-//    public static void sendQuoteDeleted(RoutingContext ctx) {
-//        sendEmptyResponse(ctx, 204);
-//    }
-
     private static void sendEmptyResponse(RoutingContext ctx, int statusCode) {
         ctx.response()
                 .setStatusCode(statusCode)
