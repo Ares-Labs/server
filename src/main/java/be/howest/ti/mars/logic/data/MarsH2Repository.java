@@ -79,6 +79,18 @@ public class MarsH2Repository {
     private final String password;
     private final String url;
 
+    private static final String LOCATION = "location";
+    private static final String WIDTH = "width";
+    private static final String HEIGHT = "height";
+    private static final String STATUS = "status";
+    private static final String DESCRIPTION = "description";
+    private static final String FULL_NAME = "full_name";
+    private static final String USER_ID = "user_id";
+    private static final String TIMESTAMP = "timestamp";
+    private static final String EQUIPMENT = "equipment";
+    private static final String COULD_NOT_GET_PROPERTIES_ERROR = "Could not get properties.";
+
+
     public MarsH2Repository(String url, String username, String password, int console) {
         try {
             this.username = username;
@@ -135,14 +147,14 @@ public class MarsH2Repository {
     private JsonObject makeProperty(ResultSet rs) throws SQLException {
         JsonObject property = new JsonObject();
         property.put("id", rs.getInt("id"));
-        property.put("location", rs.getString("location"));
+        property.put(LOCATION, rs.getString(LOCATION));
         property.put("x", rs.getInt("x"));
         property.put("y", rs.getInt("y"));
-        property.put("width", rs.getInt("width"));
-        property.put("height", rs.getInt("height"));
-        property.put("status", rs.getString("status"));
+        property.put(WIDTH, rs.getInt(WIDTH));
+        property.put(HEIGHT, rs.getInt(HEIGHT));
+        property.put(STATUS, rs.getString(STATUS));
         property.put("tier", rs.getInt("tier"));
-        property.put("description", rs.getString("description"));
+        property.put(DESCRIPTION, rs.getString(DESCRIPTION));
         return property;
     }
 
@@ -205,7 +217,7 @@ public class MarsH2Repository {
             JsonObject result = new JsonObject();
             result.put("allowedUsers", new JsonObject());
             while (rs.next()) {
-                result.getJsonObject("allowedUsers").put(rs.getString("id"), rs.getString("full_name"));
+                result.getJsonObject("allowedUsers").put(rs.getString("id"), rs.getString(FULL_NAME));
             }
             return result;
         } catch (SQLException ex) {
@@ -271,8 +283,8 @@ public class MarsH2Repository {
             JsonArray result = new JsonArray();
             while (rs.next()) {
                 JsonObject entry = new JsonObject();
-                entry.put("user_id", rs.getString("user_id"));
-                entry.put("timestamp", rs.getString("timestamp"));
+                entry.put(USER_ID, rs.getString(USER_ID));
+                entry.put(TIMESTAMP, rs.getString(TIMESTAMP));
                 result.add(entry);
             }
             return new JsonObject().put("authEntries", result);
@@ -324,8 +336,8 @@ public class MarsH2Repository {
             while (rs.next()) {
                 JsonObject alert = new JsonObject();
                 alert.put("id", rs.getInt("id"));
-                alert.put("userId", rs.getString("user_id"));
-                alert.put("timestamp", rs.getString("timestamp"));
+                alert.put("userId", rs.getString(USER_ID));
+                alert.put(TIMESTAMP, rs.getString(TIMESTAMP));
                 alerts.add(alert);
             }
 
@@ -442,12 +454,12 @@ public class MarsH2Repository {
                 JsonObject equipmentProperty = new JsonObject();
                 equipmentProperty.put("id", rs.getInt("id"));
                 equipmentProperty.put("type", rs.getInt("type"));
-                equipmentProperty.put("description", rs.getString("description"));
+                equipmentProperty.put(DESCRIPTION, rs.getString(DESCRIPTION));
                 equipmentProperty.put("name", rs.getString("name"));
                 equipment.add(equipmentProperty);
             }
 
-            result.put("equipment", equipment);
+            result.put(EQUIPMENT, equipment);
             return result;
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Could not get equipment property.", ex);
@@ -496,7 +508,7 @@ public class MarsH2Repository {
 
             if (rs.next()) {
                 result.put("id", rs.getString("id"));
-                result.put("fullName", rs.getString("full_name"));
+                result.put("fullName", rs.getString(FULL_NAME));
             }
 
             return result;
@@ -521,8 +533,8 @@ public class MarsH2Repository {
             result.put("properties", properties);
             return result;
         } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Could not get properties.", ex);
-            throw new RepositoryException("Could not get properties.");
+            LOGGER.log(Level.SEVERE, COULD_NOT_GET_PROPERTIES_ERROR, ex);
+            throw new RepositoryException(COULD_NOT_GET_PROPERTIES_ERROR);
         }
     }
 
@@ -583,7 +595,7 @@ public class MarsH2Repository {
             while (rs.next()) {
                 JsonObject user = new JsonObject();
                 user.put("id", rs.getString("id"));
-                user.put("fullName", rs.getString("full_name"));
+                user.put("fullName", rs.getString(FULL_NAME));
                 users.add(user);
             }
 
@@ -604,8 +616,8 @@ public class MarsH2Repository {
 
             return getEntries(stmt);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Could not get properties.", e);
-            throw new RepositoryException("Could not get properties.");
+            LOGGER.log(Level.SEVERE, COULD_NOT_GET_PROPERTIES_ERROR, e);
+            throw new RepositoryException(COULD_NOT_GET_PROPERTIES_ERROR);
         }
     }
 
@@ -652,7 +664,7 @@ public class MarsH2Repository {
             while (rs.next()) {
                 JsonObject drone = new JsonObject();
                 drone.put("id", rs.getInt("id"));
-                drone.put("description", rs.getString("description"));
+                drone.put(DESCRIPTION, rs.getString(DESCRIPTION));
                 drone.put("propertyId", rs.getInt("property_id"));
                 drones.add(drone);
             }
@@ -710,20 +722,20 @@ public class MarsH2Repository {
 
             if (rs.next()) {
                 result.put("id", rs.getInt("property_id"));
-                result.put("location", rs.getString("property_location"));
+                result.put(LOCATION, rs.getString("property_location"));
                 result.put("x", rs.getInt("property_x"));
                 result.put("y", rs.getInt("property_y"));
-                result.put("width", rs.getInt("property_width"));
-                result.put("height", rs.getInt("property_height"));
-                result.put("status", rs.getString("property_status"));
-                result.put("description", rs.getString("property_description"));
+                result.put(WIDTH, rs.getInt("property_width"));
+                result.put(HEIGHT, rs.getInt("property_height"));
+                result.put(STATUS, rs.getString("property_status"));
+                result.put(DESCRIPTION, rs.getString("property_description"));
                 result.put("tier", rs.getString("tier_id"));
                 result.put("tier_name", rs.getString("tier_name"));
                 result.put("owner", rs.getString("owner_id"));
                 result.put("owner_full_name", rs.getString("owner_full_name"));
 
                 JsonObject equipment = getEquipmentProperty(propertyId);
-                result.put("equipment", equipment.getValue("equipment"));
+                result.put(EQUIPMENT, equipment.getValue(EQUIPMENT));
             }
 
             return result;
