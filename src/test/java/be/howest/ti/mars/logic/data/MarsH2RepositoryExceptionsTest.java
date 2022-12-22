@@ -23,7 +23,6 @@ class MarsH2RepositoryExceptionsTest {
     @Test
     void functionsWithSQLExceptionFailsNicely() {
         // Arrange
-        int id = 1;
         JsonObject dbProperties = new JsonObject(Map.of("url", URL,
                 "username", "",
                 "password", "",
@@ -33,11 +32,7 @@ class MarsH2RepositoryExceptionsTest {
         MarsH2Repository repo = Repositories.getH2Repo();
         repo.cleanUp();
 
-        // Act + Assert
-        // TODO: Test queries
-//        Assertions.assertThrows(RepositoryException.class, () -> repo.getQuote(id));
-//        Assertions.assertThrows(RepositoryException.class, () -> repo.deleteQuote(id));
-//        Assertions.assertThrows(RepositoryException.class, () -> repo.updateQuote(id, "update"));
+        Assertions.assertThrows(RepositoryException.class, repo::getEquipmentTypes);
     }
 
 
