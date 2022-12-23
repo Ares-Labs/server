@@ -96,7 +96,7 @@ If for some reason, the api isn't available or you want to use the specification
 "url": "../documentation/api-spec/openapi-mars.yaml"
 }
 ```
- - For the to work, the folder structure must be organised as describe above.
+ - For the api to work, the folder structure must be organised as describe above.
 
 ## Local endpoints
  - H2 web client
