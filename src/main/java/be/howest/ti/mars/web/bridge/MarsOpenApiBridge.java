@@ -29,6 +29,7 @@ import java.util.logging.Logger;
  */
 public class MarsOpenApiBridge {
     private static final Logger LOGGER = Logger.getLogger(MarsOpenApiBridge.class.getName());
+    private static final Random RANDOM = new Random();
 
     public MarsOpenApiBridge() {
         // Creates new instance of the controller
@@ -48,15 +49,23 @@ public class MarsOpenApiBridge {
                         .setBodyLimit(1024 * 1024 * 10L)
                 ).handler(this::scanImage);
 
+        routerBuilder.operation("getThreatLevel")
+                .handler(this::threatLevel);
+
         LOGGER.log(Level.INFO, "All handlers are installed, creating router.");
         return routerBuilder.createRouter();
+    }
+
+    private void threatLevel(RoutingContext routingContext) {
+        Double threatLevel = BigDecimal.valueOf(RANDOM.nextDouble()).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        Response.sendSuccess(routingContext, 200, new JsonObject().put("threat_level", threatLevel));
     }
 
     private void scanImage(RoutingContext routingContext) {
         String files = routingContext.getBody().toString();
         long hash = 0;
         for (char c : files.toCharArray()) {
-            hash = 31L*hash + c;
+            hash = 31L * hash + c;
         }
         Random newRandom = new Random(hash);
         // Do very cool AI stuff here
