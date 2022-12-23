@@ -44,9 +44,9 @@ public class MarsOpenApiBridge {
 
         routerBuilder.operation("scanImage")
                 .handler(BodyHandler.create()
-                        .setUploadsDirectory("temp-uploads")
                         .setHandleFileUploads(true)
                         .setBodyLimit(1024 * 1024 * 10L)
+                        .setDeleteUploadedFilesOnEnd(true)
                 ).handler(this::scanImage);
 
         routerBuilder.operation("getThreatLevel")
