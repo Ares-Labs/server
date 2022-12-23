@@ -26,4 +26,8 @@ public class Response {
                 .put("failure", code)
                 .put("cause", quote));
     }
+
+    public static void sendSuccess(RoutingContext ctx, int code, JsonObject response) {
+        sendJsonResponse(ctx, code, response);
+    }
 }

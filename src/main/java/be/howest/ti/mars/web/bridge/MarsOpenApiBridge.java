@@ -2,13 +2,18 @@ package be.howest.ti.mars.web.bridge;
 
 import be.howest.ti.mars.web.exceptions.MalformedRequestException;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.openapi.RouterBuilder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,8 +41,27 @@ public class MarsOpenApiBridge {
         LOGGER.log(Level.INFO, "Installing failure handlers for all operations");
         routerBuilder.operations().forEach(op -> op.failureHandler(this::onFailedRequest));
 
+        routerBuilder.operation("scanImage")
+                .handler(BodyHandler.create()
+                        .setUploadsDirectory("temp-uploads")
+                        .setHandleFileUploads(true)
+                        .setBodyLimit(1024 * 1024 * 10L)
+                ).handler(this::scanImage);
+
         LOGGER.log(Level.INFO, "All handlers are installed, creating router.");
         return routerBuilder.createRouter();
+    }
+
+    private void scanImage(RoutingContext routingContext) {
+        String files = routingContext.getBody().toString();
+        long hash = 0;
+        for (char c : files.toCharArray()) {
+            hash = 31L*hash + c;
+        }
+        Random newRandom = new Random(hash);
+        // Do very cool AI stuff here
+        Double threatLevel = BigDecimal.valueOf(newRandom.nextDouble()).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        Response.sendSuccess(routingContext, 200, new JsonObject().put("threat_level", threatLevel));
     }
 
     private void onFailedRequest(RoutingContext ctx) {
