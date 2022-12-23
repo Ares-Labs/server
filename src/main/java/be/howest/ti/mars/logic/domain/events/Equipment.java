@@ -14,6 +14,7 @@ import java.util.List;
 
 public class Equipment {
     private static final MarsH2Repository repo = Repositories.getH2Repo();
+    private static final String DRONE_ID = "droneId";
 
     private Equipment() {
     }
@@ -33,10 +34,10 @@ public class Equipment {
         int droneId = drones.get(0);
         repo.dispatchDrone(droneId);
 
-        Subscriptions.emit("events.drone-dispatched", new JsonObject().put("droneId", droneId));
+        Subscriptions.emit("events.drone-dispatched", new JsonObject().put(DRONE_ID, droneId));
 
         JsonObject response = new JsonObject();
-        response.put("droneId", droneId);
+        response.put(DRONE_ID, droneId);
 
         return new DataEventResponse("dispatch-drone", response);
     }
@@ -51,10 +52,10 @@ public class Equipment {
     }
 
     public static SocketResponse recallDrone(JsonObject data) {
-        int droneId = data.getInteger("droneId");
+        int droneId = data.getInteger(DRONE_ID);
         repo.recallDrone(droneId);
 
-        Subscriptions.emit("events.drone-recalled", new JsonObject().put("droneId", droneId));
+        Subscriptions.emit("events.drone-recalled", new JsonObject().put(DRONE_ID, droneId));
 
         return new StatusMessageEventResponse("recall-drone");
     }
