@@ -10,6 +10,6 @@
   },
   "api" : {
     "dev.url": "../documentation/api-spec/openapi-mars.yaml",
-    "url": "http://project-ii.ti.howest.be/monitor/apis/group-06"
+    "url": "https://project-ii.ti.howest.be/monitor/apis/group-06"
   }
 }
