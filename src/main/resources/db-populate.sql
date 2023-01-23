@@ -29,7 +29,7 @@ VALUES ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 'John Doe'),
        ('bedb80fc-55f3-11ed-b681-07688aa63f8f', 'William Davis'),
        ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e88', 'Charlotte Anderson'),
        ('b66e49ae-55f3-11ed-a877-6f6036c85780', 'Jacob Anderson'),
-       ('bedb80fc-55f3-11ed-b681-07688aa63f80', 'Abigail Martinez'),
+       ('bedb80fc-55f3-11ed-b681-07688aa63f80', 'Abigail Martinez),
        ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e89', 'Michael Martinez'),
        ('b66e49ae-55f3-11ed-a877-6f6036c85781', 'Emily Thompson'),
        ('bedb80fc-55f3-11ed-b681-07688aa63f81', 'Benjamin Thompson'),
@@ -51,10 +51,11 @@ VALUES ('east camera', 1, 1),
        ('drone', 1, 3),
        ('drone', 2, 3);
 
--- Set Frankenstein as the owner of wallstreet and howest
+-- Set Frankenstein as the owner of wallstreet, howest and brussels
 INSERT INTO user_properties (user_id, property_id)
 VALUES ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 1),
-       ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 2);
+       ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 2),
+        ('9a0fbbc6-55f3-11ed-82ca-9313c9a89e82', 3);
 
 -- Add John and Jane as white-listed for each property
 INSERT INTO property_whitelists (user_id, property_id)
